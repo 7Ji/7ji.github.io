@@ -99,8 +99,9 @@ This tutorial assumes you have already enabled SSH and knows a little bit about 
 19. Optionally copy your all data to the internal data partition   
     1. Stop kodi ``systemctl stop kodi``
     2. Create a temporary mount point for data partition: ``mkdir -p /tmp/data``
-    3. Using rsync to transfer your data: ``rsync -qaHSx /storage/. /tmp/data``
-    4. Sync disk I/O and umount data partition: ``sync; umount /tmp/data``
+    3. Mount data partition: ``mount -o rw /dev/data /tmp/data``
+    4. Using rsync to transfer your data: ``rsync -qaHSx /storage/. /tmp/data``
+    5. Sync disk I/O and umount data partition: ``sync; umount /tmp/data``
 20. Change the stock storeboot arg since now storeboot should boot CoreELEC instead: ``/usr/sbin/fw_setenv storeboot 'run cfgloademmc'``
 21. Optionally change the bootfromnand arg if you want to boot to the CoreELEC installation on emmc for your next boot: ``/usr/sbin/fw_setenv bootfromnand 1``
 22. Optionally Reboot: ``reboot``
