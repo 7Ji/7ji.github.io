@@ -12,13 +12,13 @@ This tutorial only works on Amlogic-ng releases of CoreELEC (any release after v
 
 Following this tutorial will render your Android installation **totally unusable** as we completely erase Android from emmc, if this is not what your want, stop reading.
 
-This tutorial relies on **ampart**, a partition tool I wrote in the past few days that can support Amlogic's proprietary partition format, I've opened PR to include it in EmuELEC (https://github.com/EmuELEC/EmuELEC/pull/928) but I'm not sure if CoreELEC needs it as it already has ceemmc.
+This tutorial relies on **ampart**, a partition tool I wrote in the past few days that can support Amlogic's proprietary partition format, I've opened [PR](https://github.com/EmuELEC/EmuELEC/pull/928) to include it in EmuELEC but I'm not sure if CoreELEC needs it as it already has ceemmc.
 
 This tutorial assumes you have already enabled SSH and knows a little bit about how Linux works, and following this tutorial does not guarantee you can get a bootable CoreELEC on your emmc and won't brick your box. I take no responsibility for any data loss.
 
 1. Login to your CoreELEC box via SSH, or serial connection.
 2. Make sure mmcblk0, bootloader, reserved and env are present under /dev. If not, this tutorial does not work for you.
-3. Download ampart from the release page: https://github.com/7Ji/ampart/releases, at the time I'm writing this the newest release is v0.1. You would need to download **ampart.aarch64.xz** and **ampart.aarch64.xz.sha256**.
+3. Download ampart from the [release page](https://github.com/7Ji/ampart/releases), at the time I'm writing this the newest release is v0.1. You would need to download **ampart.aarch64.xz** and **ampart.aarch64.xz.sha256**.
 4. Check the sha256sum of **ampart.aarch64.xz** with ``sha256sum ampart.aarch64.xz``, the result should be the same with the content of **ampart.aarch64.xz.sha256**. If not, redownload it and check again.
 5. Decompress ampart with ``xz -cdk ampart.aarch64.xz > ampart``
 6. Add execution permission for ampart with ``chmod +x ampart``
