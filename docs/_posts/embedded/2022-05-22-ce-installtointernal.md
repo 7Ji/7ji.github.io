@@ -93,7 +93,7 @@ This tutorial assumes you have already enabled SSH and knows a little bit about 
 14. Mount system as RW: ``mount -o rw /dev/system /tmp/system``
 15. Copy all the stuff in COREELEC partition (/flash) to the new system partition ``cp -rva /flash/* /tmp/system``
 16. Edit cfgload under the new system partition, using ``vi`` or ``nano`` to edit ``/tmp/system/cfgload``, find line 11 (*if test "${ce_on_emmc}" = "yes"; then setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=CE_FLASH disk=FOLDER=/dev/CE_STORAGE"; fi*), you want to change ``boot=LABEL=CE_FLASH`` to ``boot=/dev/system`` and ``disk=FOLDER=/dev/CE_STORAGE`` to ``disk=/dev/data``.  
-**NOTE** You can change some steps if you want to use the official bootargs, you need to create a partition named CE_STORAGE instead of data, put things under coreelc_storage subfolder instead of the root of CE_STORAGE, and give fat fs on /dev/system a label CE_FLASH. But since we are running pure CoreELEC I don't like the FOLDER=/dev/CE_STORAGE style
+**NOTE** You can change some steps if you want to use the official bootargs, you need to create a partition named CE_STORAGE instead of data, put things under coreelec_storage subfolder instead of the root of CE_STORAGE, and give fat fs on /dev/system a label CE_FLASH. But since we are running pure CoreELEC I don't like the FOLDER=/dev/CE_STORAGE style
 17. Sync disk I/O and umount system partition: ``sync; umount /tmp/system``
 18. Create an ext4 fs on /dev/data: ``mke2fs -F -q -t ext4 -m 0 /dev/data``
 19. Optionally copy your all data to the internal data partition   
