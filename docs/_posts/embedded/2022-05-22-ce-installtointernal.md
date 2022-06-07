@@ -4,6 +4,8 @@ title:  "How to install CoreELEC/EmuELEC to emmc if cemmc does not work"
 date:   2022-05-22 14:50:07 +0800
 categories: crack
 ---
+**The following method won't work any more since I've hard-coded ampart to refuse to work on CoreELEC to avoid potential write-write conflicts with ceemmc**
+
 First I would appreciate Team CoreELEC for the ceemmc tool that can easily install CoreELEC to emmc, but that tool does not work for me (ceemmc -x and segmentation fault) so I had to come up with my own method to install
 
 If ``ceemmc`` works for you, then you should stick with it as it's the official method approved by Team CoreELEC
