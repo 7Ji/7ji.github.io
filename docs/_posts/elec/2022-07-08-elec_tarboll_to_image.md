@@ -202,7 +202,7 @@ If your device uses ``boot.ini`` (devices that need specialized image)
     ````
   
 Optionally pre-populate the /usr/config units, if the SD controller on your device is slower than the one you are using on your Linux machine (This is only useful for EmuELEC since it needs to populate ~480M for the first boot, for CoreELEC there's not so much data)
-- Create temporary folders and mount both the  ``SYSTEM`` image
+- Create temporary folders and mount both the  ``SYSTEM`` image and the part 2
   ````
   mkdir -p /mnt/eesys
   mkdir -p /mnt/eep2
@@ -249,4 +249,4 @@ Optionally notify kernel to remove the drive
 ````
 echo 1 > /sys/block/sde/device/delete 
 ````
-Remove the drive, and plug it on your device. Then you can start to use it as how you normally boot CE/EE for the first time, except you 
+Remove the drive, and plug it on your device. Then you can start to use it as how you normally boot CE/EE for the first time.
