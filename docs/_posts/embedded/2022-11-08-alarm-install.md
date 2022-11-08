@@ -18,8 +18,6 @@ The main purpose is to run several tools including Pacman (ArchLinux's package m
 A pre-built image for Armbian (e.g. [ophub's Armbian][ophub's Armbian] or other well-known distros are good enough to give you this live environment, but even CoreELEC/EmuELEC/OpenWrt should do the work (yeah). If you have a bootable ArchLinux ARM this will be easier (where you probably want to migrate/duplicate instead of fresh installation) as some easy-to-use installation tools included in [arch-install-scripts][arch-install-scripts] package are right there (``pacstrap``, ``genfstab``, etc), otherwise you might need to steel these tools from ArchLinux Package mirror or an existing installation e.g. x86-64.  
 预构建的Armbian（比如 [ophub的Armbian][ophub's Armbian]）或者其他知名发行版的镜像是充当这个安装环境的绝佳选择，不过即使你用CoreELEC/EmuELEC/OpenWrt也不会太妨碍整个安装的流程。如果你本身已经有了一个能启动的ArchLinux ARM那就更好了（不过这种情况下你可能想要迁移/克隆而不是全新安装），因为有的在[arch-install-scripts][arch-install-scripts]里的易于使用的安装工具唾手可得（``pacstrap``, ``genfstab``等），不然的话你可能需要从ArchLinux的镜像站或者是一个现存的比如x86-64平台上的安装里借用这些工具。
 
-[ophub's Armbian]: https://github.com/ophub/amlogic-s9xxx-armbian/releases
-
 I'll assume you can easily get this live environment up and not waste time wrting its steps here. **You can certainlly use an x86-64 host as the live environment, if you're just installing on a SDcard; but you probably have to do all of these on the box itself if you want to install to eMMC**    
 我就假设你能简简单单地搭建起这个安装环境，不会浪费时间写怎么安装了。**如果只是要装到SD卡上的话，你确实可以用一个x86-84的宿主来充当这个安装环境；但只要你想安装到eMMC里，你基本就得在盒子本身上操作**
 
@@ -28,13 +26,8 @@ I'll assume you can easily get this live environment up and not waste time wrtin
 Like regular ArchLinux installation on x86-64, boot partition is optional depending on your booting environment setup, only the rootfs is always required (*its fs is not limited, though, but ext4 is recommended if you want to use a mainline u-boot as your primary bootloader (see [bootloader][bootloader] below) since then we can place everything including kernel, initramfs and fdt inside rootfs itself, which saves a lot of the precious space*). You can have seperate mount points for other folders under ``/`` but I don't want to waste much space on in-efficient partitioning so I'll stick with the single root idea.  
 和x86-64平台上标准的ArchLinux安装一样，根据你的启动环境不同，boot分区是可选的，只有root分区是总是需要的（*不过，它的文件系统并不限定，但如果你想用主线u-boot作为你的主要引导程序的话，推荐ext4（参看下面的[引导程序][bootloader]章节），因为那样的话我们就能把包括内核，初始化内存盘，设备树在内的所有东西都放在root分区里面了*）。你可以让``/``下的其他文件夹都有各自的挂载点，不过我可不想在没效率的分区上浪费空间，所以本文贯彻一个root的思路
 
-[bootloader]: #bootloader--引导程序
-
 **If you're partitoning the eMMC, please check the [Partitioning of eMMC][part emmc] part below and make sure you know your on-board EPT layout if you're using the stock Amlogic bootloader, and make sure not to create MBR partitions that overlap with existing essential EPT partitions AND bootloader (usually 0~4M). And backup/restore the bootloader before and after partitioning. Partitioning the eMMC blindly may BRICK your device**  
 **如果你要给eMMC分区的话，务必查看下面的[给eMMC分区][part emmc]章节，并且如果你使用Amlogic原厂的引导程序的话，请确定你清楚你的eMMC上的EPT分区表的布局，并且不要在已经存在EPT重要分区和引导程序（一般是0~4M）的位置创建MBR分区。并且在分区前后备份和恢复bootloader。盲目地给eMMC分区可能会导致你的设备变砖**
-
-[part emmc]: #extra-partitioning-of-emmc--给emmc分区
-
 
 You have the following partition layouts to choose from, but they are really just recommendations (*Note none of them has a dedicated swap partition, which is usually not recommended for server use cases, but I like to do it in this way since I don't want to waste disk space on dedicated swap partition. You can create swapfile manually later. Also I'm strongly against using zram for swap, please just use swapfile*)  
 你有以下可以选择的分区布局，不过它们都只是建议而已 （*注意，下面所有的布局里都没有单独的swap分区，对于当作服务器的使用情景来说这一般是不推荐的，不过我不喜欢在单独的swap分区上浪费空间，所以喜欢这么做。你可以之后手动创建swapfile。对了，我强烈不建议使用zram来作为swap，要用swap请直接用swapfile*）
@@ -54,8 +47,6 @@ This can be used for almost all of the bootup environment mentioned below
 ### Seperated u-boot and root partition / 单独的u-boot和root分区
 This can only be used if you use a 2nd stage u-boot that supports loading files from an ext4 fs (mainline u-boot is often the case, see [Bootloader][bootloader] below)   
 适用于使用可以从ext4文件系统加载文件的二阶段u-boot的情况（一般是主线u-boot，看下面的[引导程序][bootloader]章节）
-
-[bootloader]: #bootloader--引导程序
 
 |part|fs|size|content|
 |-|-|-|-|
@@ -97,7 +88,6 @@ To create a fat32 fs on the boot partition
 ```
 mkfs.vfat -F 32 /dev/boot_partition
 ```
-[Arch Wiki Doc Formatting]: https://wiki.archlinux.org/title/File_systems#Create_a_file_system
 
 ## Mounting / 挂载
 The target rootfs should be mounted so we could modify the content inside it, and the boot/uboot partition then optionally mounted if you've created it:  
@@ -130,9 +120,6 @@ Make sure you've partitioned the target drive, this part assumes you've mounted 
 To bootstrap the rootfs, we have two ways of doing this: either through ``pacstrap`` that comes in the [arch-install-scripts][arch-install-scripts] package on an existing ArchLinux ARM installation (or other distro with self-compiled [pacman][pacman] and stealling the ``pacstrap`` from another ArchLinux installation, e.g. your x86 main drive), or through extraction of a pre-populated rootfs archive  
 要自举根文件系统，有两种方式：或者在现存的ArchLinux ARM安装上通过[arch-install-scripts][arch-install-scripts]包里带的``pacstrap``（或者通过在其他发行版上自己编译[pacman][pacman]然后再从另一个现存的ArchLinux安装里偷``pacstrap``，例如你的x86机子），或者通过从一个已经预先准备好的根文件系统归档里提取
 
-[arch-install-scripts]: https://archlinuxarm.org/packages/any/arch-install-scripts
-[pacman]: https://archlinuxarm.org/packages/aarch64/pacman
-
 #### Pacstrap
 If both ``pacstrap`` and its dependencies are satisfied, a simple command like the following can give you a basic functionning rootfs:  
 如果``pacstrap``和它的依赖都已经满足，那么像这样一条简单的命令就能给你一个基本的根文件系统
@@ -151,9 +138,6 @@ Assuming you have downloaded the archive as ``ArchLinuxARM-aarch64-latest.tar.gz
 ```
 bsdtar -C /mnt --acls --xattrs -xvpzf ArchLinuxARM-aarch64-latest.tar.gz 
 ```
-[rootfs main]: http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
-[rootfs tuna]: https://mirrors.tuna.tsinghua.edu.cn/archlinuxarm/os/ArchLinuxARM-aarch64-latest.tar.gz
-
 ### fstab / 文件系统表
 You need to generate the fstab required by the target fs (``/etc/fstab``), which can either be written by yourself or generated with a script like ``genfstab`` from [arch-install-scripts][arch-install-scripts]. This script is architecture-independent so you can down load the package on your x86-64 Arch machine and steal it from ``/usr/bin/genfstab``, or just download and extract the package with ``tar`` and copy it.  
 你需要生成目标系统需要的文件系统表（``/etc/fstab``），既可以自己手写也可以通过[arch-install-scripts][arch-install-scripts]里带的脚本``genfstab``来生成。这个脚本不依赖于特定架构，所以你可以在你的x86-64的Arch机器上安装这个包再从``/usr/bin/genfstab``来偷，或者干脆下载包以后用``tar``提取。
@@ -171,8 +155,6 @@ UUID=5b6e6d63-686e-4ce0-a51d-22f8e68db73a / ext4 rw,noatime 0 1
 ```
 Please refer to [fstab(5)][man fstab] for the exact format of ``fstab``, in most of the cases this should be in ``mount source``, ``mount point``, ``fs``, ``mount options``, ``dump``, ``passno``, seperated by space and/or tab  
 请参考[fstab(5)][man fstab]来了解``fstab``的具体格式，多数情况下格式应该是``挂载源``，``挂载点``，``文件系统``，``挂载选项``，``转储``，``检查次数``这样子，以空格和/或换表符分割
-
-[man fstab]: https://man.archlinux.org/man/fstab.5
 
 ### chroot / 变更根
 From now on you'll need to enter the rootfs of the target installation to finish the installation. This relies on ``chroot``, and some extra operations are needed before and after the chroot. ``arch-chroot`` from the [arch-install-scripts][arch-install-scripts] can do these for you, and it's also architecture-independent, so you can just steal it from an existing x86-64 installation, or just extract it using ``tar`` from the raw package.  
@@ -329,7 +311,6 @@ useradd -m nomad7ji
 We'll need to deploy kernel and firmware through two AUR packages I've specifically made for Amlogic devices. A package for [kernel, header and dtb][AUR kernel] and a package for [firmware][AUR firmware] needs to be built. Both just fetches ophub's pre-built binaries and align them to the ArchLinux kernel style under the hood so it's not that slow. ``mkinitcpio`` can also play nicely with this kernel. Alternatively refer to [pre-built AUR packages][bin AUR] to just download them built by me without building  
 我们需要通过两个我为Amlogic设备特别制作的AUR包来部署内核和固件。一个包是包含[内核，头文件和设备树][AUR kernel]的，一个包是包含[固件][AUR firmware]的。两个包都只是拉取ophub提前构建好的二进制并按照ArchLinux内核的风格来整理，所以不会太慢。``mkinitcpio``也可以和这个内核和平相处。也可以参见[提前打包好的AUR包][bin AUR]章节来直接下载打包好的包，而不需要构建
 
-[bin AUR]: #extra-prebuilt-aur-packages提前打包好的aur包
 Install depedencies  
 安装依赖
 ```
@@ -367,17 +348,10 @@ pacman -U linux-aarch64-flippy-bin/linux-aarch64-flippy-bin-6.0.7-1-aarch64.pkg.
 ``linux-aarch64-flippy-bin``是一个拆分包，其他没有用到的包``linux-aarch64-flippy-bin-dtb-allwinner``, ``linux-aarch64-flippy-bin-dtb``， ``linux-aarch64-flippy-bin-headers``也使用同一个``PKGBUILD``在同一次``makepkg``中创建，如果需要的话你可以安装它们*
 
 
-[AUR firmware]: https://aur.archlinux.org/linux-firmware-amlogic-ophub.git
-[AUR kernel]: https://aur.archlinux.org/linux-aarch64-flippy-bin.git
-[AUR hook]: https://aur.archlinux.org/uboot-legacy-initrd-hooks.git
-[AUR ampart]: https://aur.archlinux.org/ampart-git.git
-
 ## Bootloader / 引导程序
 ### Background / 背景
 *If you know the bootloader machanism on Amlogic platform very well, you can jump to [setups][setups] to choose one of the setups. Otherwise better get yourself acknowledged for Amlogic's boot flow from this part  
 如果你熟知Amlogic平台上的启动机制，你可以直接跳到[安装方法][setups]章节来选择一种安装方法。不然的话最好通过这一章节充分了解Amlogic的启动流程*
-
-[setups]: #setups--安装方法
 
 Several different bootloader/pre-boot environment combination can be chosen depending on the support status of your hardware in the upstream u-boot project due to the following boot flow:  
 根据你的硬件在上游u-boot项目里的支持情况不同，几种不同的引导程序/启动前环境的组合可以选择，这是因为以下的启动流程：
@@ -420,8 +394,6 @@ Several different bootloader/pre-boot environment combination can be chosen depe
 5. Different from x86, the init ramdisk **must** be prepared (i.e. loaded to RAM) by the bootloader instread of the kernel on ARM, and it's the job of the same u-boot to load the kernel. Depending on the booting mechanism this can either be a normal initramfs (possible with syslinux config ``/extlinux/extlinux.conf`` style bootup in mainline u-boot) or legacy u-boot image with a type of initrd that can be created from a normal initramfs with ``mkimage``  
 和x86不同，在ARM上，初始化的内存盘**必需**由引导程序而不是内核来准备（也就是加载到随机访问内存中），并且应当由加载内核的同一个u-boot去加载。根据启动机制的不同，这个内存盘镜像可以是普通的initramfs（用主线u-boot通过syslinux配置文件``/extlinux/extlinux.conf``启动情况下），或者是可以通过``mkimage``从普通的initramfs创建的类型为内存盘的传统的u-boot镜像
 
-[boot flow]: https://u-boot.readthedocs.io/en/latest/board/amlogic/boot-flow.html
-
 *the BL33 blob is loaded by earlier totally closed-
  source blobs, so BL33 is the earliest stage you can
  manipulate, unless you are a hardcode reverse-enginerring guy like me*  
@@ -433,8 +405,6 @@ Several different bootloader/pre-boot environment combination can be chosen depe
 
 You can find pre-built resources for bootloader (the whole BL2 to BL33/u-boot chain packed as a single image) and u-boot (plain u-boot a.k.a. BL33) in [ophub's repo][ophub bl] (called bootloader and overload accordingly in the repo)  
 你可以在[ophub的仓库][ophub bl]里找到预构建的引导程序（整个BL2到BL33/u-boot引导链的打包镜像）和u-boot（普通的u-boot也就是BL33）（在仓库里分别叫做bootloader和overload）
-
-[ophub bl]: https://github.com/ophub/amlogic-s9xxx-armbian/tree/main/build-armbian/amlogic-u-boot
 
 The following bootloader setups can be used depending on what kind of bootloader/u-boot you could get for your device:  
 可以使用以下的引导程序配置：  
@@ -518,8 +488,6 @@ Keep stock signed encrpted bootloader image with stock u-boot on eMMC as the 1st
         *The number ``0x7400000`` and ``0x10000`` here mean offset at 116MiB and size 64KiB, you'll need to use my partition tool [ampart][ampart] first to check the actual offset of EPT partition ``env`` first. ampart can be built with a simple ``make`` with only dependency on ``zlib``, and the EPT can be checked with a simple ``ampart /dev/your_emmc_drive``  
         数字``0x7400000``和``0x10000``在这里分别是偏差116MiB和大小64KiB，你需要用我的工具[ampart][ampart]先来检查EPT分区``env``的偏差。ampart可以通过一条简单的``make``来构建，仅有的依赖是``zlib``，而EPT分区表也可以通过一条简单的``ampart /dev/your_emmc_drive``来检查*  
 
-        [ampart]: https://github.com/7Ji/ampart
-
         Then actually use ``fw_setenv``:  
         然后再使用``fw_setenv``
         ```
@@ -588,12 +556,6 @@ If you can't modify u-boot envs directly, please refer to the latter part to lea
 #### Others / 其他方案
 There's also other choices, you can create your bootup machanism freely as long as the boot flow won't break  
 也有其他的选择，你可以自由地创建你的启动机制，只要整个启动流程不要崩掉
-
-[build u-boot]: https://u-boot.readthedocs.io/en/latest/board/amlogic/odroid-c4.html
-[amlogic-s9xxx-armbian]: https://github.com/ophub/amlogic-s9xxx-armbian
-[gxlimg]: https://github.com/repk/gxlimg
-[unifreq's u-boot]: https://github.com/unifreq/u-boot
-[unifreq's amlogic-boot-fip]: https://github.com/unifreq/amlogic-boot-fip
 
 ## Booting configuration / 启动配置
 After you got the bootloader set up, now your shinny new u-boot needs configuration to actually boot your system. Depending on the last stage u-boot which will load the kernel, you have different configurations to use:  
@@ -684,9 +646,6 @@ The plain-text boot script can then be compiled into a u-boot script with the fo
 ```
 mkimage -C none -A arm -T script -d /path/to/plain/text/script /path/to/uboot/script
 ```
-
-[syslinux config]: https://wiki.syslinux.org/wiki/index.php?title=Config
-
 
 ### aml_autoscript
 This is a special case for stock u-boot that's basically the same as the script above, the only difference is that it'll be automatically executed by the stock u-boot if the device is booted in update mode (either through Android ``reboot update`` or a cold boot with reset button held down). Due to this nature, we can use this script as an entry-point that'll prepare the u-boot env for consecutive boots   
@@ -862,7 +821,6 @@ git clone https://aur.archlinux.org/ampart-git.git
 cd ampart-git
 makepkg -si
 ```
-[ampart-git]: https://aur.archlinux.org/packages/ampart-git
 On Debian-derived distros (e.g. Ubuntu, Armbian) you can clone the [ampart repo][ampart] and build with a simple ``make``(remember to install built dependencies ``git``, ``build-essential`` and ``zlib1g-dev`` first):  
 在Debian衍生的发行版（比如Ubuntu，Armbian）上你可以克隆[ampart仓库][ampart]并通过简单的``make``来构建（记得通过``apt``安装构建依赖``git``,``build-essential``和``zlib1g-dev``）：
 ```
@@ -1041,8 +999,6 @@ Then if you re-pack the image, you'll have a burning image that's only several M
 For all of the AUR packages mentioned in this article ([linux-aarch64-flippy-bin][AUR kernel], [linux-firmware-amlogic-ophub][AUR firmware], [uboot-legacy-initrd-hooks][AUR hook], [ampart][AUR ampart]), I've uploaded the pre-built packages to [my resource site][AUR bin mirror], you can use them directly if you trust me (but you shouldn't, better build them by yourself, you should only trust official repos on Linux):  
 对于本文中提到的所有AUR包（[linux-aarch64-flippy-bin][AUR kernel], [linux-firmware-amlogic-ophub][AUR firmware], [uboot-legacy-initrd-hooks][AUR hook], [ampart][AUR ampart]），我都把构建好的包上传到了[我的资源站][AUR bin mirror]，如果你信任我的话（但你真的不应该，最好自己构建，在Linux上应该只信任官方的仓库）:
 
-[AUR bin mirror]: https://ee.fuckblizzard.com/AUR
-
 These are their sha256sums at the time this article is written:  
 写本文时的这些包的sha256校验和
 ```
@@ -1055,3 +1011,31 @@ d7cadd77505f5f5cee42848f7a3afd20e51d23ca0116fb16c6ddbf25d1d08bef  linux-aarch64-
 31543083749eaaed48fc6e5e61eeb79eb7798f3d6b7d4ef5122ff8237ae31cbc  linux-firmware-amlogic-ophub-20220916-1-aarch64.pkg.tar.xz
 e535229316d23960e4e6588f6bf409410f9defccdc7367dca8c6a3cbaad78e30  uboot-legacy-initrd-hooks-0.0.1-1-aarch64.pkg.tar.xz
 ```
+
+[bootloader]: #bootloader--引导程序
+[part emmc]: #extra-partitioning-of-emmc--给emmc分区
+[bin AUR]: #extra-prebuilt-aur-packages提前打包好的aur包
+[setups]: #setups--安装方法
+
+[ophub's Armbian]: https://github.com/ophub/amlogic-s9xxx-armbian/releases
+[Arch Wiki Doc Formatting]: https://wiki.archlinux.org/title/File_systems#Create_a_file_system
+[arch-install-scripts]: https://archlinuxarm.org/packages/any/arch-install-scripts
+[pacman]: https://archlinuxarm.org/packages/aarch64/pacman
+[rootfs main]: http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
+[rootfs tuna]: https://mirrors.tuna.tsinghua.edu.cn/archlinuxarm/os/ArchLinuxARM-aarch64-latest.tar.gz
+[man fstab]: https://man.archlinux.org/man/fstab.5
+[AUR firmware]: https://aur.archlinux.org/packages/linux-firmware-amlogic-ophub
+[AUR kernel]: https://aur.archlinux.org/packages/linux-aarch64-flippy-bin
+[AUR hook]: https://aur.archlinux.org/packages/uboot-legacy-initrd-hooks
+[AUR ampart]: https://aur.archlinux.org/packages/ampart-git
+[boot flow]: https://u-boot.readthedocs.io/en/latest/board/amlogic/boot-flow.html
+[ophub bl]: https://github.com/ophub/amlogic-s9xxx-armbian/tree/main/build-armbian/amlogic-u-boot
+[ampart]: https://github.com/7Ji/ampart
+[build u-boot]: https://u-boot.readthedocs.io/en/latest/board/amlogic/odroid-c4.html
+[amlogic-s9xxx-armbian]: https://github.com/ophub/amlogic-s9xxx-armbian
+[gxlimg]: https://github.com/repk/gxlimg
+[unifreq's u-boot]: https://github.com/unifreq/u-boot
+[unifreq's amlogic-boot-fip]: https://github.com/unifreq/amlogic-boot-fip
+[syslinux config]: https://wiki.syslinux.org/wiki/index.php?title=Config
+[ampart-git]: https://aur.archlinux.org/packages/ampart-git
+[AUR bin mirror]: https://ee.fuckblizzard.com/AUR
