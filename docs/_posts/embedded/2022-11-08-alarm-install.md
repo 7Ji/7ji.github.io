@@ -29,6 +29,17 @@ Like regular ArchLinux installation on x86-64, boot partition is optional depend
 **If you're partitoning the eMMC, please check the [Partitioning of eMMC][part emmc] part below and make sure you know your on-board EPT layout if you're using the stock Amlogic bootloader, and make sure not to create MBR partitions that overlap with existing essential EPT partitions AND bootloader (usually 0~4M). And backup/restore the bootloader before and after partitioning. Partitioning the eMMC blindly may BRICK your device**  
 **如果你要给eMMC分区的话，务必查看下面的[给eMMC分区][part emmc]章节，并且如果你使用Amlogic原厂的引导程序的话，请确定你清楚你的eMMC上的EPT分区表的布局，并且不要在已经存在EPT重要分区和引导程序（一般是0~4M）的位置创建MBR分区。并且在分区前后备份和恢复bootloader。盲目地给eMMC分区可能会导致你的设备变砖**
 
+If you are using ``GNU/parted``, then the danger areas can be ignored easily like this, if e.g. the first 100MiB can't be touched:  
+如果你用的是``GNU/parted``的话，那么危险的区域就可以像这样避开，比如说最前面的100MiB不能碰的时候：
+```
+parted -s /dev/emmc_device mkpart primary fat32 100MiB 164MiB
+```
+But if you are using ``fdisk``, then you need to calculate that partition's offset: ``100 MiB * 1024^2 Byte/MiB / 512 Byte/Sector = 204800 sectors``, so the partition needs to be created at 204800 sectors as offset, but the size could be a simple ``+64M``  
+但如果你用的是``fdisk``，那么你就要计算分区的偏移：``100兆字节 * 1024^2字节/兆字节 / 512字节/扇区 = 204800 扇区``，那么分区就要创建在偏移204800扇区的位置，不过大小可以简单的``+64M``
+
+If you'll need to use a mainline u-boot to boot, remember it'll scan for bootable partations, and will fallback to the first entry in the partition table if none of them is found. To mark a partition as bootable in a MBR partition table, either add a boot flag (with ``a`` in ``fdisk``, one per table), or set its type to ``EFI`` (with ``t`` then ``ef`` in ``fdisk``, every partition could be) or similar type.  
+如果你要使用主线u-boot来启动的话，记住它会扫描可启动的分区，并且会在无结果的情况下回落到分区表里的第一个分区。要把一个MBR分区表里面的分区标记为可启动，要么添加一个启动标志（在``fdisk``里通过``a``命令，一个分区表里只能有一个），要么设置分区的类型为``EFI``（在``fdisk``里通过``t``命令，然后输入标识``ef``，所以分区都可以是）或者类似的类型
+
 You have the following partition layouts to choose from, but they are really just recommendations (*Note none of them has a dedicated swap partition, which is usually not recommended for server use cases, but I like to do it in this way since I don't want to waste disk space on dedicated swap partition. You can create swapfile manually later. Also I'm strongly against using zram for swap, please just use swapfile*)  
 你有以下可以选择的分区布局，不过它们都只是建议而已 （*注意，下面所有的布局里都没有单独的swap分区，对于当作服务器的使用情景来说这一般是不推荐的，不过我不喜欢在单独的swap分区上浪费空间，所以喜欢这么做。你可以之后手动创建swapfile。对了，我强烈不建议使用zram来作为swap，要用swap请直接用swapfile*）
 
@@ -118,7 +129,7 @@ Make sure you've partitioned the target drive, this part assumes you've mounted 
 
 ### Bootstrap of the rootfs / root自举
 To bootstrap the rootfs, we have two ways of doing this: either through ``pacstrap`` that comes in the [arch-install-scripts][arch-install-scripts] package on an existing ArchLinux ARM installation (or other distro with self-compiled [pacman][pacman] and stealling the ``pacstrap`` from another ArchLinux installation, e.g. your x86 main drive), or through extraction of a pre-populated rootfs archive  
-要自举根文件系统，有两种方式：或者在现存的ArchLinux ARM安装上通过[arch-install-scripts][arch-install-scripts]包里带的``pacstrap``（或者通过在其他发行版上自己编译[pacman][pacman]然后再从另一个现存的ArchLinux安装里偷``pacstrap``，例如你的x86机子），或者通过从一个已经预先准备好的根文件系统归档里提取
+要自举根文件系统，有两种方式：要么在现存的ArchLinux ARM安装上通过[arch-install-scripts][arch-install-scripts]包里带的``pacstrap``（或者通过在其他发行版上自己编译[pacman][pacman]然后再从另一个现存的ArchLinux安装里偷``pacstrap``，例如你的x86机子），要么通过从一个已经预先准备好的根文件系统归档里提取
 
 #### Pacstrap
 If both ``pacstrap`` and its dependencies are satisfied, a simple command like the following can give you a basic functionning rootfs:  
@@ -324,12 +335,12 @@ And uncomment the line ``%wheel ALL=(ALL:ALL) ALL`` through ``visudo`` to allow 
 visudo
 ```
 Create your own user, either with group ``wheel`` so it can use ``sudo``  
-创建你自己的用户，或者把它添加到``wheel``组里，这样就能用``sudo``
+创建你自己的用户，要么把它添加到``wheel``组里，这样就能用``sudo``
 ```
 useradd -g wheel -m nomad7ji
 ```
 or not, if you prefer just switch to ``root``  
-或者不添加，如果你喜欢直接切换到``root``的话
+要么不添加，如果你喜欢直接切换到``root``的话
 ```
 useradd -m nomad7ji
 ```
@@ -560,7 +571,7 @@ Keep stock signed encrpted bootloader image with stock u-boot on eMMC as the 1st
 
 #### Stock bootloader all the way / 自始至终原厂引导程序
 If you don't want to break anything, you can keep the stock bootloader and does not load any u-boot, and just rely on the stock u-boot to load the kernel. The stock u-boot then needs to either run ``booti`` itself, or load other scripts to do the work  
-如果你不想整坏任何东西，你可以保留原厂的引导程序，并且不加载任何的u-boot，仅依靠原厂的u-boot来加载内核。这样的话原厂的u-boot就需要或者自己跑``booti``，或者加载其他脚本来调用``booti``  
+如果你不想整坏任何东西，你可以保留原厂的引导程序，并且不加载任何的u-boot，仅依靠原厂的u-boot来加载内核。这样的话原厂的u-boot就需要要么自己跑``booti``，要么加载其他脚本来调用``booti``  
 The basic idea is to load kernel, initrd and fdt from a FAT fs, the most essential commands include these, if, for example, you are storing these in the first partition on eMMC (see above and below for ``fatload`` syntax):  
 基本的思路是从一个FAT分区来加载内核，初始化内存盘和设备树，假如你把这些存放在eMMC上的第一个分区的话，最重要的命令包含这些（请从上下其他部分看``fatload``的语法）
 ```
@@ -691,8 +702,8 @@ mkimage -C none -A arm -T script -d /path/to/plain/text/script /path/to/uboot/sc
 ```
 
 ### aml_autoscript
-This is a special case for stock u-boot that's basically the same as the script above, the only difference is that it'll be automatically executed by the stock u-boot if the device is booted in update mode (either through Android ``reboot update`` or a cold boot with reset button held down). Due to this nature, we can use this script as an entry-point that'll prepare the u-boot env for consecutive boots   
-这是一个原厂u-boot的特别情况，基本和前述的脚本原理一样，唯一的区别是这个脚本会自动被原厂的u-boot在升级模式（通过安卓下``reboot update``或者按住重置按钮来冷启动）下自动执行。因为这一特点，我们可以把这个脚本当作入口脚本，来为之后的启动设置u-boot环境
+This is a special case for stock u-boot that's basically the same as the script above, the only difference is that it'll be automatically executed by the stock u-boot if the device is booted in update mode (either through Android or u-boot ``reboot update`` or a cold boot with reset button held down). Due to this nature, we can use this script as an entry-point that'll prepare the u-boot env for consecutive boots   
+这是一个原厂u-boot的特别情况，基本和前述的脚本原理一样，唯一的区别是这个脚本会自动被原厂的u-boot在升级模式（通过安卓或u-boot下``reboot update``或者按住重置按钮来冷启动）下自动执行。因为这一特点，我们可以把这个脚本当作入口脚本，来为之后的启动设置u-boot环境
 
 These are the sources for ``aml_autoscript``, ``s905_autoscript`` and ``emmc_autoscript`` from project [amlogic-s9xxx-armbian][amlogic-s9xxx-armbian]. As you can see the first script ``aml_autoscript`` sets up the environment variables ``bootcmd``, ``start_autoscript``, ``start_emmc_autoscript``, ``start_mmc_autoscript`` and ``start_usb_autoscript``. In later boots the new ``bootcmd`` will be effective and function as the entry point for the mmc->usb->emmc->storeboot priority, and the scripts ``s905_autoscript`` and ``emmc_autoscript`` will be used accordingly:  
 下面是[amlogic-s9xxx-armbian][amlogic-s9xxx-armbian]项目中``aml_autoscript``, ``s905_autoscript``, ``emmc_autoscript``的脚本。如你所见第一个脚本``aml_autoscript``设置了环境变量``bootcmd``, ``start_autoscript``, ``start_emmc_autoscript``, ``start_mmc_autoscript``和``start_usb_autoscript``。之后的启动中新的``bootcmd``就会生效，并充当mmc->usb->emmc->storeboot这一引导顺序的入口点，并且脚本``s905_autoscript``和``emmc_autoscript``会分别被使用
