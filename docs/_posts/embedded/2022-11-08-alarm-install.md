@@ -344,6 +344,11 @@ or not, if you prefer just switch to ``root``
 ```
 useradd -m nomad7ji
 ```
+If you'll need to login as this user, set its password, otherwise you can only ``su`` to it from ``root``:  
+如果你需要作为这个用户登录的话，设置它的密码，不然你只能从``root``用户通过``su``切换到这个用户：
+```
+passwd nomad7ji
+```
 #### SSH server / SSH服务器
 *This step is put here after the creation of users because sshd by default only allows non-root users to login  
 这一步被放在用户创建之后的原因是sshd默认只允许非root用户登录*

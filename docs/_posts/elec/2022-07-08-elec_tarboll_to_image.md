@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "Make a bootable CoreELEC/EmuELEC drive with update tarboll instead of image"
+title:  "Make a bootable CoreELEC/EmuELEC drive with update tarball instead of image"
 date:   2022-07-08 17:17:12 +0800
 categories: elec
 ---
 ## Introduction
-This documents a method to make a bootable CoreELEC/EmuELEC drive, with update tarboll (.tar) instead of images (.img/.img.gz), this will be of good use if you want to use the nightly EmuELEC builds available at [my EE nightly build site](https://ee.fuckblizzard.com) directly as I don't have enough disk space to store images so there's only update tarbolls there
+This documents a method to make a bootable CoreELEC/EmuELEC drive, with update tarball (.tar) instead of images (.img/.img.gz), this will be of good use if you want to use the nightly EmuELEC builds available at [my EE nightly build site](https://ee.fuckblizzard.com) directly as I don't have enough disk space to store images so there's only update tarballs there
 
 You get the following benifits to prepare a bootable CE/EE disk in this way
 * You can decide the partition size by yourself (So there won't be ~300M or ~1G "wasted" )
@@ -21,58 +21,58 @@ The disadvantage though:
 You will need the following tools and environments:
 * A Linux machine, physical or virtual, with USB/SD access to the drive you're going to use for the bootable disk. If you're using Windows then VirtualBox+USB passthrough should work, but I suggest a physical Linux machine.
 * Root access on that Linux machine, as root or with sudo
-* 2 * the size of the update tarboll on that machine
+* 2 * the size of the update tarball on that machine
 
 
 And as always:
 * You are familiar with CLI operations under Linux environment
 
 ## Operation
-**Don't copy/paste the commands blindly, most of them will differ depending on your actual drive and the tarboll you use and the image you want to create!**
+**Don't copy/paste the commands blindly, most of them will differ depending on your actual drive and the tarball you use and the image you want to create!**
 
-Download the tarboll you'll use
+Download the tarball you'll use
 ````
 wget https://ee.fuckblizzard.com/EmuELEC-Amlogic-ng.aarch64-4.5-Nexus_nightly_20220706.tar
 ````
-Create temporary folders for the tarboll, the part 1 and the part 2
+Create temporary folders for the tarball, the part 1 and the part 2
 ````
-mkdir {tarboll,part1}
+mkdir {tarball,part1}
 ````
-Extract the content of that tarboll
+Extract the content of that tarball
 ````
-tar --strip-components=1 -C tarboll -xvf EmuELEC-Amlogic-ng.aarch64-4.5-Nexus_nightly_20220706.tar
+tar --strip-components=1 -C tarball -xvf EmuELEC-Amlogic-ng.aarch64-4.5-Nexus_nightly_20220706.tar
 ````
 Move/Copy kernel and system images
 ````
-mv tarboll/target/KERNEL part1/kernel.img
-mv tarboll/target/SYSTEM part1/
+mv tarball/target/KERNEL part1/kernel.img
+mv tarball/target/SYSTEM part1/
 ````
 Move/Copy the dtb
 ````
-mv tarboll/3rdparty/bootloader/device_trees/your_dtb.dtb part1/dtb.img
+mv tarball/3rdparty/bootloader/device_trees/your_dtb.dtb part1/dtb.img
 ````
 Move/Copy the bootloader specific files (**Multiple** steps are needed to be performed depending on your device)
 - All devices that need specialized images (Odroid N2, Odroid C2, etc), **and** all generic Amlogic-ng devices
   ````
-  mv tarboll/3rdparty/bootloader/config.ini part1/
+  mv tarball/3rdparty/bootloader/config.ini part1/
   ````
 - All devices that need specialized images
   ````
-  mv tarboll/3rdparty/bootloader/**[DEVICE_NAME]**_boot.ini part1/boot.ini
-  mv tarboll/3rdparty/bootloader/**[VENDOR_NAME]**-boot-logo-1080.bmp.gz part1/boot-logo-1080.bmp.gz
+  mv tarball/3rdparty/bootloader/**[DEVICE_NAME]**_boot.ini part1/boot.ini
+  mv tarball/3rdparty/bootloader/**[VENDOR_NAME]**-boot-logo-1080.bmp.gz part1/boot-logo-1080.bmp.gz
   ````
 - LibreComputer devices
   ````
-  mv tarboll/3rdparty/bootloader/**[DEVICE_NAME]**_chain_u-boot part1/u-boot.bin
-  mv tarboll/3rdparty/bootloader/libretech_chain_boot part1/boot.scr
+  mv tarball/3rdparty/bootloader/**[DEVICE_NAME]**_chain_u-boot part1/u-boot.bin
+  mv tarball/3rdparty/bootloader/libretech_chain_boot part1/boot.scr
   ````
 - Generic Amlogic (both -ng and -old/non-ng) devices
   ````
-  mv tarboll/3rdparty/bootloader/aml_autoscript part1/
+  mv tarball/3rdparty/bootloader/aml_autoscript part1/
   ````
 - Generic Amlogic-ng devices
   ````
-  mv tarboll/3rdparty/bootloader/Generic_cfgload part1/cfgload
+  mv tarball/3rdparty/bootloader/Generic_cfgload part1/cfgload
   ````
 
 A summary table
@@ -234,8 +234,8 @@ losetup -D
 For devices that need u-boot, i.e. those need specialized images (Odroid N2, etc), remember we leave a 4M gap before the first partition? We'll write the u-boot to the disk now
 - Remember to replace sde with correct drive
   ````
-  dd if=tarboll/3rdparty/bootloader/CorrespondingUboot of=/dev/sde conv=fsync,notrunc bs=1 count=112
-  dd if=tarboll/3rdparty/bootloader/CorrespondingUboot of=/dev/sde conv=fsync,notrunc bs=512 skip=1 seek=1
+  dd if=tarball/3rdparty/bootloader/CorrespondingUboot of=/dev/sde conv=fsync,notrunc bs=1 count=112
+  dd if=tarball/3rdparty/bootloader/CorrespondingUboot of=/dev/sde conv=fsync,notrunc bs=512 skip=1 seek=1
   ````
   Notice we skip the bytes 113-512, this is where the partition table is stored
 
