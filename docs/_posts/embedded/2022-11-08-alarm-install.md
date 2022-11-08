@@ -228,6 +228,32 @@ Edit ``/etc/locale.conf`` and set the locale you'll need to use **before the spa
 LANG=en_US.UTF-8
 ```
 
+### Updating / 升级
+*This step is put after localization because many packages will break when installing/upgrading if ``LANG`` is not set correctly (i.e. ``LANG=C``)  
+这一步被放在本地化之后，因为如果``LANG``没有正确设置（也就是``LANG=C``），很多软件在安装/升级时会出错*
+#### Pacman mirror / Pacman 镜像
+ArchLinux ARM by default uses a GeoIP based mirror selecting "server" as the mirror for Pacman, the problem is that many mirror sites are not recorded by ArchLinux ARM maintainers so these good mirrors wouldn't be selected ever  
+ArchLinux ARM默认情况是使用基于地理IP的镜像选择“服务器”作为Pacman的镜像，一个问题是很多镜像站没有被ArchLinux ARM的维护者收录，所以这些好镜像永远也不会被选中
+
+If you are in China, then tuna is a good mirror site to use instead that is not recorded, edit ``/etc/pacman.d/mirrorlist``, comment the line  
+如果你在中国，那么清华大学tuna就是一个不错的没有被收录的镜像站，编辑``/etc/pacman.d/mirrorlist``，注释掉这行
+```
+Server = http://mirror.archlinuxarm.org/$arch/$repo
+```
+And add a line  
+并添加一行
+```
+Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxarm/$arch/$repo
+```
+#### Full upgrade / 完全升级
+Since ArchLinux is a rolling release, never to a partial upgrade, run the following command to upgrade everything  
+因为ArchLinux是一个滚动发行版，永远不要只局部升级，用下面这条命令来升级全部软件包
+```
+pacman -Syu
+```
+**You must do this now if you prepared the target rootfs by extraction of rootfs archive, since the archive is only updated per a few months  
+如果你是通过提取根文件系统归档来部署这个根文件系统的，你现在必须升级，因为那个归档几个月才更新一次**
+
 ### Networking / 网络
 #### hostname / 主机名
 You need to set your hostname in ``/etc/hostname``, which should not be duplicated on your local network, note it can only has 15 characters and it's recommended to only use [0-9A-Z-_]. A hostname like ``hk17Ji`` will be seen as ``HK17JI`` by Windows hosts:  
@@ -306,6 +332,23 @@ or not, if you prefer just switch to ``root``
 或者不添加，如果你喜欢直接切换到``root``的话
 ```
 useradd -m nomad7ji
+```
+#### SSH server / SSH服务器
+*This step is put here after the creation of users because sshd by default only allows non-root users to login  
+这一步被放在用户创建之后的原因是sshd默认只允许非root用户登录*
+
+It's important to enable ssh server if you're planning to use the device as a server. If you prepared the target rootfs through extraction of the rootfs archive then this step can be skipped, as the ``ssh`` package is already installed and ``sshd.service`` is enabled by default  
+如果你要把这个设备当成服务器使用的话，启用ssh服务器就很重要。如果你是通过提取根文件系统归档来准备的目标根文件系统，这一步可以跳过，因为其中``ssh``包已经预装且``sshd.service``默认已经被启用
+
+Install the ``ssh`` package  
+安装``ssh``软件包
+```
+pacman -S ssh
+```
+Enable the ``sshd.service`` systemd unit  
+启用``sshd.service``单元
+```
+systemctl enable sshd.service
 ```
 #### kernel / 内核
 We'll need to deploy kernel and firmware through two AUR packages I've specifically made for Amlogic devices. A package for [kernel, header and dtb][AUR kernel] and a package for [firmware][AUR firmware] needs to be built. Both just fetches ophub's pre-built binaries and align them to the ArchLinux kernel style under the hood so it's not that slow. ``mkinitcpio`` can also play nicely with this kernel. Alternatively refer to [pre-built AUR packages][bin AUR] to just download them built by me without building  
