@@ -213,10 +213,10 @@ This will remove ``binutils``, ``diffutils``, ``linux-firmware``, ``linux-firmwa
 pacman -R linux-aarch64 linux-firmware linux-firmware-whence
 ```
 ### Timezone / 时区
-Setup the timezone via the following command (replace ``China/Shanghai`` with your area accordingly)  
-通过下面的命令来设置时区（根据你的区域，替换``China/Shanghai``）
+Setup the timezone via the following command (replace ``Asia/Shanghai`` with your area accordingly)  
+通过下面的命令来设置时区（根据你的区域，替换``Asia/Shanghai``）
 ```
-ln -sf /usr/share/zoneinfo/China/Shanghai /etc/localtime
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 ```
 Different from x86-64, usually you should not sync the time to RTC since most boxes won't come with RTC, the following command is only needed if your device has a RTC, which is barely the case and a premium that only some SBC has (e.g. Odroid N2+ comes with a RTC)  
 和x86-64不同，一般你不需要把时间同步到RTC，因为大多数盒子都没有RTC，下面这条命令只有在你的设备有RTC的时候才需要，而这很罕见，只有少部分高贵的开发板比如Odroid N2+才有。
@@ -520,8 +520,8 @@ Keep stock signed encrpted bootloader image with stock u-boot on eMMC as the 1st
     fatload mmc 1:1 0x1000000 mainline
     go 0x1000000
     ```
-    *Note the syntax of ``fatload`` is ``fatload [devtype] [devnum](:[partnum] [hex address] [filename]``, where ``devtype`` can be one of ``mmc``, ``usb`` (**Additional command ``usb start`` should be executed before a ``usb`` type device can be read**), and ``devnum`` starts at 0, ``partnum`` starts at 1 (can be omitted when it's 1).    
-    注意``fatload``的语法是``fatload [设备类型] [设备号] [分区号] [16进制地址] [文件名]``，其中``设备类型``可以是``mmc``, ``usb``（**要从``usb``类型的设备读取，一条额外的命令``usb start``应该在此之前被执行**），``设备号``从0开始，``分区号``从1开始（当为1时可以被省略）  
+    *Note the syntax of ``fatload`` is ``fatload [devtype] [devnum](:[partnum]) [hex address] [filename]``, where ``devtype`` can be one of ``mmc``, ``usb`` (**Additional command ``usb start`` should be executed before a ``usb`` type device can be read**), and ``devnum`` starts at 0, ``partnum`` starts at 1 (can be omitted when it's 1).    
+    注意``fatload``的语法是``fatload [设备类型] [设备号](:[分区号]) [16进制地址] [文件名]``，其中``设备类型``可以是``mmc``, ``usb``（**要从``usb``类型的设备读取，一条额外的命令``usb start``应该在此之前被执行**），``设备号``从0开始，``分区号``从1开始（当为1时可以被省略）  
     It's recommended to **confirm the exact partition identifier with ``fatls [devtype] [devnum](:[partnum])`` in u-boot first** to make sure the ``[devtype] [devnum](:[partnum])`` identifier points to the exact partition where you store your mainline u-boot  
     建议**先在u-boot下通过``fatls [设备类型] [设备号](:[分区号])``来确认**标识符``[设备类型] [设备号](:[分区号])``指向的分区确确实实是你放主线u-boot的分区*  
     This bootcmd can be set in the following ways:  
@@ -773,8 +773,8 @@ setenv bootcmd 'fatload mmc 1:1 0x1000000 uEnv.txt; env import -t 0x1000000; fat
 saveenv
 reboot
 ```
-or like the following, imitated the mainline behaviour to load ``boot.scr`` and execute it (``source`` must be supported)  
-或者像下面这样，模仿主线的行为，加载``boot.scr``并执行（``source``命令必须被支持）
+or like the following, imitated the mainline behaviour to load ``boot.scr`` and execute it (``source`` must be supported (usually in mainline), otherwise use ``autoscr`` instead (usually in stock))  
+或者像下面这样，模仿主线的行为，加载``boot.scr``并执行（``source``命令必须被支持（主线一般都是），否则请用``autoscr``（原厂一般都是））
 ```
 defenv
 setenv bootcmd 'fatload mmc 1:1 0x1000000 boot.scr; source 0x1000000'
