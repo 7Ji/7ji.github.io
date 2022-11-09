@@ -694,6 +694,17 @@ done
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr
 ```
+This script expects a plain-text file ``uEnv.txt`` with ``key=value`` pairs to provide essential variables:  
+这个脚本期待一个里面是``键=值``对的纯文本文件``uEnv.txt``来提供必要的变量
+```
+LINUX=/zImage
+INITRD=/uInitrd
+FDT=/dtb/amlogic/meson-sm1-x96-max-plus-100m.dtb
+APPEND=root=UUID=5eaeec73-cfda-47de-acd3-e6dc43f7c13e rootflags=data=writeback rw rootfstype=ext4 console=ttyAML0,115200n8 console=tty0 no_console_suspend consoleblank=0 fsck.fix=yes fsck.repair=yes net.ifnames=0 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1
+```
+Note ``INITRD`` here points to a legacy uboot initrd, this is due to the command ``booti`` is used in the script to load the kernel, for which the initramfs must be in the format of legacy uboot initrd  
+注意这里的``INITRD``指向到了一个传统的uboot初始化内存盘，这是因为脚本里是用命令``booti``来加载内核的，这条命令要求初始化内存盘必须以uboot传统初始化内存盘的形式存储
+
 As you can see the file has a syntax similar to shell scripting, since u-boot uses hush shell and some common shell syntaxes are ported, but you won't find your familiar shell tools and couldn't use fancy stuffs like piping.  
 如同所见，这个文件的语法和shell脚本很相似，因为u-boot是用的是hush shell，然后一些常见的shell语法被移植了，不过你找不到熟悉的shell工具，并且也不能整一些诸如管道之类的花活
 
