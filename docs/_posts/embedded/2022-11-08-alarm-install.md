@@ -1031,8 +1031,14 @@ A recommended way to utilize it, is the dclone mode which will manipulate the dt
 ```
 ampart /dev/your_eMMC_drive --mode dclone data::-1:4
 ```
-This will modify the partitions node in DTB, remove all other partitions and create a single data partition which will fill the table up, then update EPT according to the partitions node in DTB, and automatically migrate essential partitions (e.g. env) so you don't need to dd before and after to backup and restore them  
-这条命令会修改DTB里面的分区节点，删除所有分区，只创建一个data分区来自动填充分区表，然后根据DTB里面的分区表来更新EPT，然后自动迁移所有重要的分区（比如env），你就不用在前后用dd分别备份和还原了
+This will modify the partitions node in DTB, remove all other partitions and create a single data partition which will fill the table up, then update EPT according to the partitions node in DTB, and automatically migrate essential partitions (e.g. env) so you don't need to dd before and after to backup and restore them.
+这条命令会修改DTB里面的分区节点，删除所有分区，只创建一个data分区来自动填充分区表，然后根据DTB里面的分区表来更新EPT，然后自动迁移所有重要的分区（比如env），你就不用在前后用dd分别备份和还原了。
+
+*For post-SC2(S905X4, S905D4) devices like HK1 RBOX X4, there're more partitions you shouldn't remove, the command should be changed as to:  
+对于SC2(S905X4, S905D4)之后的设备，比如说HK1 RBOX X4，有更多不能移除的分区，命令应该改成这个样子*
+```
+ampart /dev/your_eMMC_drive --mode dclone boot_a::64M:1 vbmeta_a::2M:1 vbmeta_system_a::2M:1 data::-1:4`` 
+```
 
 *result EPT on my HK1Box  
 我HK1Box上的结果的EPT*
@@ -1053,6 +1059,26 @@ ID| name            |          offset|(   human)|            size|(   human)| ma
 ```
 Then the ``env`` partition will be guaranteed to be placed at 116M~124M. And you can freely create partition in your MBR table at 4M~36M (gap between bootloader and reserved), 100M~116M (gap between reserved and env, since cache is 0B), 117M~end (since env starts at 116M and the actual data size in env is usually only 64K, it's safe enough to begin at 117M)  
 这样的话，``env``分区就一定会被放置在116M到124M的位置。你可以在你的MBR分区表里自由地在4M-36M（bootloader和reserved之间的空隙），100M-116M（reserved和env之间的空隙，因为cache大小是0），117M到结尾（因为env在116M开始，它里面的实际数据大小一般只有64K，从117M开始是足够安全的）这些地方创建分区
+
+This can be pushed further to extreme with another run in ``ecreate`` mode, which will remove the partitions node in DTB so the EPT won't be "fixed" by Amlogic u-boot, so ampart can have more freedom on the placement of partitions. **This mode should not be used in post-SC2(s905x4,s905d4) devices, they rely on partitions node in DTB to work**:  
+通过再用一次``ecreate``模式，把DTB里面的分区节点直接移除，废掉Amlogic u-boot的“修复”EPT功能，ampart就能在分区的布局上有更大的自由。**不要在SC2（s905x4，s905d4）之后的设备上用这个模式，它们需要DTB里面的分区节点来正常工作**
+```
+ampart /dev/your_eMMC_drive --mode ecreate data:::
+```
+And the EPT will become like this, more spaces can be used in MBR partition table(4-36M, 100M-end):  
+EPT分区表就会变成这样，更多的空间可以在MBR分区表里分配（5-36M, 100M到结尾）
+```
+===================================================================================
+ID| name            |          offset|(   human)|            size|(   human)| masks
+-----------------------------------------------------------------------------------
+ 0: bootloader                      0 (   0.00B)           400000 (   4.00M)      0
+ 1: env                        400000 (   4.00M)           800000 (   8.00M)      0
+ 2: cache                      c00000 (  12.00M)                0 (   0.00B)      0
+    (GAP)                                                 1800000 (  24.00M)
+ 3: reserved                  2400000 (  36.00M)          4000000 (  64.00M)      0
+ 4: data                      6400000 ( 100.00M)       1d18800000 ( 116.38G)      4
+===================================================================================
+```
 
 Even better, if you have the Android burning image and UART connection, you can unpack that Android .img for you device, then use ``ampart`` to delete all partitions except the last ``data`` partition in the DTB (if it's multi/gzipped DTB, corresponding operations are needed), and also those partition files you don't need in the image itself:  
 甚至更棒的是，如果你有安卓刷机包，也有UART连接，你可以把安卓的.img解包，然后用``ampart``删掉DTB里面除了最后的``data``分区之外的所有分区（如果DTB是多合一/gzip压缩过的，也需要对应的操作），再把你不需要的分区文件都删掉
