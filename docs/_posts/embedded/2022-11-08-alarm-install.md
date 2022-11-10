@@ -624,6 +624,7 @@ After you got the bootloader set up, now your shinny new u-boot needs configurat
 |-|-|-|-|-|-|
 |syslinux (extlinux)|``/extlinux/extlinux.conf`` ``/boot/extlinux/extlinux.conf``|yes|depends|no|standard legacy
 |script|``/boot.scr`` ``/boot.scr.uimg`` ``/boot/boot.scr`` ``/boot/boot.scr.uimg``|yes|yes|yes|legacy
+|efi-stub*|-|yes|depends|no|standard
 |aml_autoscript*|``/aml_autoscript`` ``/aml_autoscript.zip``|no|depends|yes|legacy
 
 ### syslinux (extlinux)
@@ -717,6 +718,68 @@ The plain-text boot script can then be compiled into a u-boot script with the fo
 mkimage -C none -A arm -T script -d /path/to/plain/text/script /path/to/uboot/script
 ```
 
+### efi-stub
+This is a special case for mainline u-boot, sinec u-boot added EFI support long time ago, it's possible to use ``bootefi`` instead of ``booti`` and ``sysboot`` to load an EFI-STUB, which could be the kernel itself or another bootloader like GRUB, systemd-boot. If, e.g. kernel, initrd and fdts are all in eMMC partition 4, then the following commands can load the kernel directly if it was built with ``CONFIG_EFI_STUB=y``:  
+这是一个主线u-boot的特别情况，因为u-boot很久以前就添加了EFI支持，可以使用``bootefi``而不是``booti``和``sysboot``来加载一个EFI执行程序，这个EFI执行程序既可以是内核自己，也可以是像GRUB，systemd-boot这样的引导程序。比如，当内核，初始化内存盘，和设备树都放在eMMC分区4的时候，下面的命令就可以直接加载一个构建时配置了``CONFIG_EFI_STUB=y``的内核：
+
+```
+load mmc 1:4 ${fdt_addr_r} /boot/dtbs/linux-aarch64-flippy/amlogic/meson-gxl-s905x-p212.dtb
+load mmc 1:4 ${kernel_addr_r} /boot/vmlinuz-linux-aarch64-flippy
+setenv bootargs 'initrd=/boot/initramfs-linux-aarch64-flippy.img root=UUID=9f75c223-4ebe-48b7-b4cb-f3823ed5f96f rootflags=data=writeback rw rootfstype=ext4 console=ttyAML0,115200n8 console=tty0 fsck.fix=yes fsck.repair=yes'
+bootefi ${kernel_addr_r} ${fdt_addr_r}
+```
+**Note the argument initrd should be passed as an argument to kernel directly, and the path should be seperated by ``/`` instead of ``\`` like on x86-64. The initrd *has to be a standard initramfs and not a u-boot legacy initrd*  
+注意参数initrd应该被作为参数穿递给内核，并且路径应当以``/``而不是像x86-64上那样以``\``分割。初始化内存盘*必需是标准的initramfs，而不可以是u-boot传统内存盘***
+
+This can be encapsuled with a booting script and an external plain text file to easily update the essential variables  
+可以通过一个启动脚本和一个外部的纯文本文件来方便地更新必要变量，来把这一启动逻辑封装
+
+e.g. The bare-minumum source for ``/boot/boot.scr`` (remember to compile it to u-boot script) when these are loaded from eMMC part 4  
+比如，最基本的``/boot/boot.scr``源码（记得把它编译为u-boot脚本），当这些东西都是从eMMC分区4加载的时候
+```
+load mmc 1:4 ${loadaddr} /boot/uEnv.txt
+env import -t ${loadaddr}
+load mmc 1:4 ${fdt_addr_r} ${FDT}
+load mmc 1:4 ${kernel_addr_r} ${LINUX}
+setenv bootargs "initrd=${INITRD} ${APPEND}"
+bootefi ${kernel_addr_r} ${fdt_addr_r}
+```
+with its corresponding plain-text``uEnv.txt``:  
+它所对应的纯文本的``uEnv.txt``
+```
+LINUX=/boot/vmlinuz-linux-aarch64-flippy
+INITRD=/boot/initramfs-linux-aarch64-flippy.img
+FDT=/boot/dtbs/linux-aarch64-flippy/amlogic/meson-gxl-s905x-p212.dtb
+APPEND=root=UUID=9f75c223-4ebe-48b7-b4cb-f3823ed5f96f rootflags=data=writeback rw rootfstype=ext4 console=ttyAML0,115200n8 console=tty0 fsck.fix=yes fsck.repair=yes
+```
+*Under the hood this script will be executed by a built-in u-boot variable like this:  
+实际上这个脚本会被u-boot里的内置变量以下面这样的形式来执行*
+```
+load mmc 1:4 ${scriptaddr} /boot/boot.scr
+source ${scriptaddr}
+```
+
+When booting take note of the u-boot log before kernel is loaded to verify it's booted as EFI stub:  
+启动的时候注意看u-boot的日志，来确认它以EFI可执行程序被启动了
+```
+Booting /\boot\vmlinuz-linux-aarch64-flippy
+EFI stub: Booting Linux Kernel...
+EFI stub: Using DTB from configuration table
+EFI stub: Loaded initrd from command line option
+EFI stub: Exiting boot services...
+```
+And check sysfs in userspace to confirm EFIvars are identified  
+并且在用户空间里检查sysfs来确认EFI变量被识别了
+```
+# ls /sys/firmware/efi/efivars/
+AuditMode-8be4df61-93ca-11d2-aa0d-00e098032b8c               PlatformLang-8be4df61-93ca-11d2-aa0d-00e098032b8c       SetupMode-8be4df61-93ca-11d2-aa0d-00e098032b8c
+DeployedMode-8be4df61-93ca-11d2-aa0d-00e098032b8c            PlatformLangCodes-8be4df61-93ca-11d2-aa0d-00e098032b8c  VendorKeys-8be4df61-93ca-11d2-aa0d-00e098032b8c
+OsIndicationsSupported-8be4df61-93ca-11d2-aa0d-00e098032b8c  SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c
+```
+You could in theory load other boot managers as EFISTUB but as I think that just adds non-neccessary boot times, so you could try and configure that by yourself and I'll not write about that  
+理论上你也能把其他启动管理器作为EFISTUB加载，不过我认为那样的话只是增加了不必要的启动时间，所以你可以自己去尝试和配置，我就不写了
+
+
 ### aml_autoscript
 This is a special case for stock u-boot that's basically the same as the script above, the only difference is that it'll be automatically executed by the stock u-boot if the device is booted in update mode (either through Android or u-boot ``reboot update`` or a cold boot with reset button held down). Due to this nature, we can use this script as an entry-point that'll prepare the u-boot env for consecutive boots   
 这是一个原厂u-boot的特别情况，基本和前述的脚本原理一样，唯一的区别是这个脚本会自动被原厂的u-boot在升级模式（通过安卓或u-boot下``reboot update``或者按住重置按钮来冷启动）下自动执行。因为这一特点，我们可以把这个脚本当作入口脚本，来为之后的启动设置u-boot环境
@@ -791,6 +854,17 @@ defenv
 setenv bootcmd 'fatload mmc 1:1 0x1000000 boot.scr; source 0x1000000'
 saveenv
 reboot
+```
+or even just use ``aml_autoscript`` itself to load the kernel each time, if you blow up the on-eMMC Android system and env partition, the stock u-boot will 100% fallback to update mode, so this script will always be executed  
+或者干脆用``aml_autoscript``本身来每次加载内核，如果你把eMMC上的安卓系统和env分区搞爆炸了，那么原厂的u-boot一定会回落到升级模式，那么这个脚本就总是会被执行
+```
+fatload mmc 1:1 0x1000000 uEnv.txt
+env import -t 0x1000000
+fatload mmc 1:1 0x1000000 ${FDT}
+fatload mmc 1:1 0x1080000 ${LINUX}
+fatload mmc 1:1 0x3080000 ${INITRD}
+setenv bootargs ${APPEND}
+booti 0x1080000 0x3080000 0x1000000
 ```
 
 ## Initrd / 初始化内存盘
