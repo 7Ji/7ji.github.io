@@ -21,9 +21,11 @@
 title: 7Ji's Blog
 email: pugokushin@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Author of ampart, eemount, HybridELEC, and more. Member of Team EmuELEC.
+  Contributor to EmuELEC, CoreELEC and Armbian.
+  Focused on reverse-engineering and embedded development, mainly 
+  on Amlogic platforms. 
+  Keep It Simple, Stupid.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://7ji.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 #twitter_username: jekyllrb
