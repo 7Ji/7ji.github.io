@@ -281,8 +281,8 @@ myhostname
 应该在``/etc/hosts``中填写众所周知的主机名，至少下面两条是必须的，没有它们一些网络程序无法正常工作
 
 ```
-localhost   127.0.0.1
-localhost   ::1
+127.0.0.1       localhost
+::1             localhost
 ```
 #### network config / 网络配置
 If you've prepared the root with ``pacstrap``, then no network manager is enabled; if you've prepared it by extracting the rootfs archive, then ``systemd-networkd`` and ``systemd-resolved`` are enabled by default, and configurations to start DHCP on interfaces ``eth0`` and ``en*`` are already there, you can skip this step  
