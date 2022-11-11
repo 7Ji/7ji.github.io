@@ -21,10 +21,6 @@
 title: 7Ji's Blog
 email: pugokushin@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Author of ampart, eemount, HybridELEC, and more. Member of Team EmuELEC.
-  Contributor to EmuELEC, CoreELEC and Armbian.
-  Focused on reverse-engineering and embedded development, mainly 
-  on Amlogic platforms. 
   Keep It Simple, Stupid.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://7ji.github.io" # the base hostname & protocol for your site, e.g. http://example.com
