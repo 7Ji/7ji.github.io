@@ -8,6 +8,9 @@ categories: embedded
 This article will guide you to install ArchLinux ARM on an out-of-tree Amlogic device in the ArchLinux way, which can grant you the maximum freedom as you can decide most of the details unlike guided installation where most of them are decided by the official maintainers like Manjaro, Ubuntu, etc.  
 这篇文章会指导你如何在不被官方支持的Amlogic设备上以ArchLinux的方式安装ArchLinux ARM，这种安装方法能给你最大的自由，因为你可以决定大多数的细节，不像官方引导安装那样大多数细节被定死，比如Manjaro, Ubuntu那样
 
+If you prefer a flash-and-boot experience, check my [amlogic-s9xxx-archlinuxarm][amlogic-s9xxx-archlinuxarm] project, where you could either build by yourself on ArchLinuxARM or download my pre-built images  
+如果你更喜欢刷完就能启动，可以看我的[amlogic-s9xxx-archlinuxarm][amlogic-s9xxx-archlinuxarm]项目，你既可以在ArchLinuxARM上自己构建，也可以下载我构建好的镜像
+
 ## The Live environment / 安装环境
 
 You'll need a live environment to do the installation, like how we need an ArchLinux installation ISO or other distros for the task for installation of ArchLinux on x86-64.   
@@ -500,6 +503,7 @@ e535229316d23960e4e6588f6bf409410f9defccdc7367dca8c6a3cbaad78e30  uboot-legacy-i
 [AUR firmware]: https://aur.archlinux.org/packages/linux-firmware-amlogic-ophub
 [AUR hook]: https://aur.archlinux.org/packages/uboot-legacy-initrd-hooks
 [AUR kernel]: https://aur.archlinux.org/packages/linux-aarch64-flippy-bin
+[amlogic-s9xxx-archlinuxarm]: https://github.com/7Ji/amlogic-s9xxx-archlinuxarm
 [amlogic-s9xxx-armbian]: https://github.com/ophub/amlogic-s9xxx-armbian
 [ophub's Armbian]: https://github.com/ophub/amlogic-s9xxx-armbian/releases
 [arch-install-scripts]: https://archlinuxarm.org/packages/any/arch-install-scripts
