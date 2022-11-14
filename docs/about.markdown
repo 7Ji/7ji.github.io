@@ -30,6 +30,10 @@ Author of the following projects:
    - Brings USB Burning Tool image for [CoreELEC] to Xiaomi Mibox3/3C (MDZ-16-AA), on which eMMC CE booting was thought impossible.
    - Mixed build system
    - Licensed under GPL2
+ - [amlogic-s9xxx-archlinuxarm](https://github.com/7Ji/amlogic-s9xxx-archlinuxarm)
+   - Simple build script to compose a bootable ArchLinuxARM image for Amlogic S9xxx devices (mainly TV boxes)
+   - Periodically releases corresponding images and rootfs archives
+   - Great live environment choice when installing ArchLinuxARM in the ArchLinux way following [the documentation](embedded/2022/11/08/alarm-install.html) on this blog
  - [videoArchiver.py](https://github.com/7Ji/videoArchiver.py)
    - A multithreading video archiving tool, generating both archive-level and preview-level AV1 video footages and N by N montage snapshots with ease, so you can easily store the big archive guy to the cold storage and keep the tiny preview footage and snapshots by hand to save your precious disk space.
    - stream level multithreading and interrupt-proof recovery support
