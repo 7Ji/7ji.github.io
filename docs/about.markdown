@@ -37,12 +37,9 @@ Author of the following projects:
  - [auto-whu-openwrt](https://github.com/7Ji/auto-whu-openwrt) and [auto-whu-standard](https://github.com/7Ji/auto-whu-standard)
    - Automatical ePortal authorization tool for WHU
 
-Maintainer of the following project
- - [EmuELEC][EmuELEC]
-   - As the member of team EmuELEC
-
 Contributor to the following projects
  - [CoreELEC][CoreELEC]
+ - [EmuELEC][EmuELEC]
  - [Armbian][Armbian]
 
 Maintainer of the following AUR packages:
