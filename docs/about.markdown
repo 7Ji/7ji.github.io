@@ -26,8 +26,8 @@ Author of the following projects:
    - Licensed under GPL3
    - Official mounting tool for [EmuELEC][EmuELEC]
  - [HybridELEC](https://github.com/7Ji/HybridELEC)
-   - Brings side-by-side dual booting support to [CoreELEC][CoreELEC] and [EmuELEC][EmuELEC], and even Android+CE+EE triple boot. Make things team CE thought impossible to happen
-   - Brings USB Burning Tool image for [CoreELEC] to Xiaomi Mibox3/3C (MDZ-16-AA), on which eMMC CE booting was though impossible. The one of many things CE are afraid of.
+   - Brings side-by-side dual booting support to [CoreELEC][CoreELEC] and [EmuELEC][EmuELEC], and even Android+CE+EE triple boot.
+   - Brings USB Burning Tool image for [CoreELEC] to Xiaomi Mibox3/3C (MDZ-16-AA), on which eMMC CE booting was thought impossible.
    - Mixed build system
    - Licensed under GPL2
  - [videoArchiver.py](https://github.com/7Ji/videoArchiver.py)
