@@ -62,7 +62,7 @@ This is only for experienced Amlogic device tinkers. If done incorrectly you cou
  9. Identify the eMMC block device, which should be `/dev/mmcblk0` if you're running systems with Amlogic kernel, e.g. EmuELEC, etc; or `/dev/mmcblk2` if you're running systems with mainline kernel, e.g. ArchLinuxARM, Armbian, OpenWrt, etc.  
  辨别eMMC的块设备，如果你运行的系统使用的是Amlogic内核，比如EmuELEC等，那么应该是`/dev/mmcblk0`；如果你运行的系统使用的是主线内核，比如ArchLinuxARM，Armbian，OpenWrt等，那么应该是`/dev/mmcblk2`
  10. Write the DTB to eMMC at 40MiB offset and 40MiB+256KiB offset seperately. *The DTBs are stored at 40MiB ~ 40MiB+256KiB, and 40MiB+256KiB ~ 40MiB+512KiB, as two identical copies, the last 16Bytes of both are 4-Byte magic, version, timestamp and checksum*  
- 把DTB分别写入到eMMC的偏移40MiB和40MiB。*DTB存储在40MiB到40MiB+256KiB，和40MiB+256KiB到40MiB+512KiB，两份完全相同，两者最后的16字节都依次是4字节的幻数，版本，时间戳和校验和*
+ 把DTB分别写入到eMMC的偏移40MiB和40MiB+256KiB。*DTB存储在40MiB到40MiB+256KiB，和40MiB+256KiB到40MiB+512KiB，两份完全相同，两者最后的16字节都依次是4字节的幻数，版本，时间戳和校验和*
       ```
       dd if=decrypted.dtb of=[your eMMC block device] bs=256K seek=160 conv=notrunc
       dd if=decrypted.dtb of=[your eMMC block device] bs=256K seek=161 conv=notrunc
