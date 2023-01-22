@@ -1,0 +1,3 @@
+[submodule "docs/CargoStranding"]
+	path = docs/CargoStranding
+	url = https://github.com/7Ji/CargoStrandingWeb
