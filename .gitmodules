@@ -1,3 +1,6 @@
 [submodule "docs/CargoStranding"]
 	path = docs/CargoStranding
 	url = https://github.com/7Ji/CargoStrandingWeb
+[submodule "docs/ampart-web-reporter"]
+	path = docs/ampart-web-reporter
+	url = https://github.com/7Ji/ampart-web-reporter
