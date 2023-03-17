@@ -88,9 +88,9 @@ Steps to install a bootloader with mainline u-boot as BL33 onto eMMC, when ``mmc
 *Tested device: HK1 Box, as someone has compiled a mainline u-boot for it packed as bootloader image that's included in [amlogic-s9xxx-armbian][amlogic-s9xxx-armbian]. With tools like [gxlimg][gxlimg] you can also sign a mainline u-boot for u200 or similar devices with minor tweaks, and pack it at your bootloader image, it's pretty easy to port. There're also projects like flippy's [u-boot][unifreq's u-boot] and [amlogic-boot-fip][unifreq's amlogic-boot-fip] with already ported sources to refer to  
    测试过的设备：HK1 Box，[amlogic-s9xxx-armbian][amlogic-s9xxx-armbian]项目中有给这个设备打包好的包含主线u-boot的引导程序镜像。通过像是[gxlimg][gxlimg]这样的工具你也能给u200或是类似设备的主线u-boot签名并打包成你的引导程序镜像，移植起来很简单。还有像是flippy的[u-boot][unifreq's u-boot]和[amlogic-boot-fip][unifreq's amlogic-boot-fip]这样由已经移植过的源码的项目可以参照*  
 
-#### Mainline/dirty as 2nd stage / 主线/移植作为二阶段
-Keep stock signed encrpted bootloader image with stock u-boot on eMMC as the 1st stage u-boot, load a mainline/dirty (newer, purposedly built Amlogic) u-boot from a FAT partition on eMMC/SD/USB, and then a fat or ext4 on eMMC/SD containing syslinux config or bootscript, plus kernel, initrd and fdt to startup. If it's ext4 then it can be the rootfs itself, if it's fat it can be the exact same partition uboot is stored in.  
-在eMMC上保留原厂的签名过且加密过的引导程序镜像和里面的原厂u-boot作为第一阶段u-boot，从eMMC/SD/USB上的FAT分区加载主线或者是脏的（更新的，特别构建的Amlogic）u-boot，然后以一个eMMC/SD上的一个fat或者是ext4分区加载syslinux配置或是引导脚本，加上内核、初始化内存盘和设备树。如果这个分区是ext4的话，那它可以是根文件系统本身；如果这个分区是fat的话，那它可以就是uboot被储存在的同一个分区
+#### Mainline/vendor as 2nd stage / 主线/移植作为二阶段
+Keep stock signed encrpted bootloader image with stock u-boot on eMMC as the 1st stage u-boot, load a mainline/vendor (newer, purposedly built Amlogic) u-boot from a FAT partition on eMMC/SD/USB, and then a fat or ext4 on eMMC/SD containing syslinux config or bootscript, plus kernel, initrd and fdt to startup. If it's ext4 then it can be the rootfs itself, if it's fat it can be the exact same partition uboot is stored in.  
+在eMMC上保留原厂的签名过且加密过的引导程序镜像和里面的原厂u-boot作为第一阶段u-boot，从eMMC/SD/USB上的FAT分区加载主线或者是厂商的（更新的，特别构建的Amlogic）u-boot，然后以一个eMMC/SD上的一个fat或者是ext4分区加载syslinux配置或是引导脚本，加上内核、初始化内存盘和设备树。如果这个分区是ext4的话，那它可以是根文件系统本身；如果这个分区是fat的话，那它可以就是uboot被储存在的同一个分区
 1. (linux) To mount the u-boot partition you created earlier  
 挂载你所创建的有FAT文件系统的uboot分区并把你的主线u-boot储存在其中  
     *when uboot is in its dedicated partition  
@@ -114,8 +114,8 @@ Keep stock signed encrpted bootloader image with stock u-boot on eMMC as the 1st
     ```
     cp u-boot.bin /mnt/boot/mainline
     ```
-3. (u-boot) Make sure the stock u-boot will load the mainline/dirty u-boot when booting, e.g. when ``/dev/uboot_partition`` is the 1st partition on eMMC (eMMC is usually mmc1, SD is usually mmc0), the following commands should be executed by the stock u-boot  
-确保原厂的u-boot会在启动时加载主线/脏的u-boot，比如，当``/dev/uboot_partition``是eMMC上的第一个分区时(eMMC一般是mmc1，SD一般是mmc0)，下面的命令应该被原厂u-boot执行
+3. (u-boot) Make sure the stock u-boot will load the mainline/vendor u-boot when booting, e.g. when ``/dev/uboot_partition`` is the 1st partition on eMMC (eMMC is usually mmc1, SD is usually mmc0), the following commands should be executed by the stock u-boot  
+确保原厂的u-boot会在启动时加载主线/更新的厂商的u-boot，比如，当``/dev/uboot_partition``是eMMC上的第一个分区时(eMMC一般是mmc1，SD一般是mmc0)，下面的命令应该被原厂u-boot执行
     ```
     fatload mmc 1:1 0x1000000 mainline
     go 0x1000000
@@ -220,7 +220,7 @@ There's also other choices, you can create your bootup machanism freely as long 
 After you got the bootloader set up, now your shinny new u-boot needs configuration to actually boot your system. Depending on the last stage u-boot which will load the kernel, you have different configurations to use:  
 既然你已经搭建好了引导程序，现在你崭新的u-boot就需要配置文件来真正地启动你的系统了。根据最后一阶段的要加载内核的u-boot，你有以下不同的配置来选择
 
-|style|file|mainline|dirty|stock|initramfs|  
+|style|file|mainline|vendor|stock|initramfs|  
 |-|-|-|-|-|-|
 |syslinux (extlinux)|``/extlinux/extlinux.conf`` ``/boot/extlinux/extlinux.conf``|yes|depends|no|standard legacy
 |script|``/boot.scr`` ``/boot.scr.uimg`` ``/boot/boot.scr`` ``/boot/boot.scr.uimg``|yes|yes|yes|legacy
@@ -255,7 +255,7 @@ As you may find from the configuration, a standard initramfs can be directly use
 Regardless of what u-boot you are using, a script can be loaded from any fs the u-boot support and executed, as long as it's stored in u-boot script format (or plain text with a dedicated header, if you're using an Odroid or similar u-boot)  
 不管你是用的是什么u-boot，都能从这个u-boot支持的文件系统中加载脚本并执行，只要这个脚本以u-boot脚本的格式打包（或者是纯文本，不过有特定的开头，如果你用的是Odroid或者类似的u-boot的话）
 
-Mainline u-boot, by default, will run ``scan_dev_for_scripts`` after scanning for syslinux for each partition, and potential script targets include ``boot.scr.uimg`` and ``boot.scr``, with optional prefix ``/boot``. This might also be supported in the dirty/stock u-boot, and can be implemented with easy setenv for stock u-boot (It's recommended to set them with the method mentionded in the [aml_autoscript](#aml_autoscript))  
+Mainline u-boot, by default, will run ``scan_dev_for_scripts`` after scanning for syslinux for each partition, and potential script targets include ``boot.scr.uimg`` and ``boot.scr``, with optional prefix ``/boot``. This might also be supported in the vendor/stock u-boot, and can be implemented with easy setenv for stock u-boot (It's recommended to set them with the method mentionded in the [aml_autoscript](#aml_autoscript))  
 主线内核在默认情况下会对每个分区在扫描完syslinux后扫描脚本，扫描有可选前缀``/boot``的脚本``boot.scr.uimg``和``boot.scr``。这也能在原厂或是粗暴移植的u-boot中得到支持，并且能通过简单的setenv在原厂u-boot上实现（建议通过下面[aml_autoscript](#aml_autoscript)中的方式实现）
 
 An example boot script that's used in the [amlogic-s9xxx-armbian][amlogic-s9xxx-armbian] project:  
