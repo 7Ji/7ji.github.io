@@ -33,7 +33,7 @@ As of writing the latest release has a label `ARCH_202311`, currently it's named
 
 You can then mv the ISO to filesystem root for an easier to lookup path
 ```
-mv archlinux-x86_64.iso /archiso
+sudo mv archlinux-x86_64.iso /archiso
 ```
 Since we're going to erase the old partitions anyway, tainting the root fs is not that a big deal in my opinion.
 
@@ -152,9 +152,9 @@ This shall be done pretty much the same as the [Installation Guide](https://wiki
   - Choose a safe variant to every package. Namely I'd recommend to choose `linux-hardended` over `linux` or `linux-lts`
   - Install a firewall and enable it unless you know what you're doing. I'd recommend `nftables`, which comes with a pretty sane default config.
   - Pre-configure your services with least trust to the Internet. Open only the necessary parts.
-- Unless you don't trust Aliyun (and in that case you shouldn't even rent their ECS), you should use their mirror which is not neccessarily faster but would save the bandwidth usage of other mirror sites.
+- Unless you don't trust Aliyun (and in that case you shouldn't even rent their ECS), you should use their mirror which is not neccessarily faster but would save the bandwidth usage of other mirror sites. Edit `/etc/pacman.d/mirrorlist` and prepend the following server:
     ```
-    Server = https://mirrors.aliyun.com/archlinux/$repo/os/$arch
+    Server = http://mirrors.cloud.aliyuncs.com/archlinux/$repo/os/$arch
     ```
 
 
@@ -223,9 +223,13 @@ The following configs are what I would do differently or not includeded in the g
     [Network]
     DHCP=ipv4
     ```
+- Run the `resolv.conf` provided by `systemd-resolved`:
+    ```
+    ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+    ```
 - Remember to enable the necessary systemd units:
     ```
-    systemctl enable sshd systemd-networkd nftables
+    systemctl enable sshd systemd-{network,resolve}d nftables
     ```
 
 ## Finish
