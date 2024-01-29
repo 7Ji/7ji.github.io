@@ -7,9 +7,11 @@ categories: booting
 
 Back in the early RPi days, there was not a single golden standard about how booting should be done on an ARM board and how kernels, initrds and DTBs shall be stored and loaded. Many chose to come up with their own booting script, and store them in a convenient way they see fit.
 
-For many years, most distros would store their kernel, initrd and DTBs in a flat layout: kernel as `Image`, `Image.gz`, `zImage`, etc; initrd as `initrd`, `w`; dtb as `dtbs/vendor/board`. This is very simple and makes install/boot scripts easier to write. Later some would introduce "variable" supports in their scripts, from e.g. `uEnv.txt`, and make these changable, but most still install them to the path they were always using.
+For many years, most distros would store their kernel, initrd and DTBs in a flat layout: kernel as `Image`, `Image.gz`, `zImage`, etc; initrd as `initrd`; dtb as `dtbs/vendor/board`. This is very simple and makes install/boot scripts easy to write. Later some would introduce "variable" supports in their scripts, from e.g. `uEnv.txt`, and make these changable, but most still install them to the path they were always using.
 
-But a big problem is that every single distro could, even if they don't, use a totally different layout, and "common practice" followed by "most" distros never stops this from happening. After many years of the misary, u-boot finally decided enough is enough, and introduced "distro boot", which is, also many years before today, before even "distro boot" itself is deprecated.
+But a big problem is that every single distro could, even if they don't, use a totally different layout, and "common practice" followed by "most" distros never stops this from happening. 
+
+Until one day, after many years of the misary, u-boot finally decided enough is enough, and introduced "distro boot", which is, also many years before today, before even "distro boot" itself is deprecated.
 
 The whole "distro boot" concept could be checked in older u-boot docs before it's deprecated, but the main idea is that, for each potentially bootable device, u-boot would try to `scan_dev_for_boot_part` to find a bootable partition, then `scan_dev_for_boot` to find either `extlinux/extlinux.conf`, or `boot.scr(.uimg)`, or `efi/boot/bootaa64.efi`, with an optional `/boot/` prefix (e.g., `extlinux.conf` would be looked up at `/extlinux/extlinux.conf` then `/boot/extlinux/extlinux.conf`). 
 
@@ -87,9 +89,13 @@ If you use `Arch Linux` on x86_64 for daily driver you should be familiar with l
 2. For each kernel, their initcpio shall be stored as `/boot/{initramfs|dracute|booster}-[kernel name]`, so no initcpio would conflict with each other.
 3. **The important difference here**: For each kernel, their DTBs shall be stored under `/boot/dtbs/[kernel name]`, so no DTBs would confclit with each other.
 
-This is very simple to be achieve, all you need to do is to install kernel and DTBs to a restricted path that's unique to each kernel package. But to my surprise not many distro would do this. A big reason I guess, is that most of them already have too many users, and changing those paths would be considered breaking change. So many just stick to the paths they've always been using since the early rpi days.
+This is very simple to do, all you need to do is to install kernel and DTBs to a restricted path that's unique to each kernel package, and remember to adapt your `make dtbs_install` steps.
 
-I introduced this to my [linux-aarch64-flippy-bin](https://github.com/7Ji-PKGBUILDs/linux-aarch64-flippy-bin/commit/3423660d6a8a64044aba562a24045747ef9e2f6a) on Nov 6, 2022 when creating my [amlogic-s9xxx-archlinuxarm](https://github.com/7Ji/amlogic-s9xxx-archlinuxarm) project, and thanks to the fact that the project was built from ground up, I didn't need to care about "existing" user base as I didn't have one. After that I've been always using that for all ALARM kernel packages I maintain. Maybe I'm the first kernel package maintainer to use this layout, but this is really just a small trick that anyone at any time could perform so there's nothing I want to argue here. A major point I want to make here is that both `amlogic-` and [orangepi5-archlinuxarm](https://github.com/7Ji/orangepi5-archlinuxarm) projects of mine have hundreds of users and such layout from day 1 never breaks.
+But to my surprise, not many distro would do this. A big reason I guess, is that most of them already have too many users, and changing those paths would be considered breaking change. So many just stick to the paths they've always been using since the early rpi days.
+
+I introduced this to my [linux-aarch64-flippy-bin](https://github.com/7Ji-PKGBUILDs/linux-aarch64-flippy-bin/commit/3423660d6a8a64044aba562a24045747ef9e2f6a) on Nov 6, 2022 when creating my [amlogic-s9xxx-archlinuxarm](https://github.com/7Ji/amlogic-s9xxx-archlinuxarm) project, and thanks to the fact that the project was built from scratch without existing user base, I was not limited by the existing layout.
+
+After that I've been always using that for all ALARM kernel packages I maintain. Maybe I'm the first kernel package maintainer to use this layout, but this is really just a small trick that anyone at any time could perform so there's nothing I want to argue here. A major point I want to make here is that both `amlogic-` and [orangepi5-archlinuxarm](https://github.com/7Ji/orangepi5-archlinuxarm) projects of mine have hundreds of users and such layout from day 1 never breaks.
 
 At the end of the day, maybe this is not really needed for an end user who would only install and use one single kernel pacakges, but this would really be of good help for people like me who would constantly jump between different kernel packages they maintain. 
 
