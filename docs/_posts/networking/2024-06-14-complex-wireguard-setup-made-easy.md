@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Complex WireGuard Setup made easy with wireguard-deployer"
-date:   2024-06-14 11:30:00:00 +0800
+date:   2024-06-14 11:30:00 +0800
 categories: networking
 ---
 
