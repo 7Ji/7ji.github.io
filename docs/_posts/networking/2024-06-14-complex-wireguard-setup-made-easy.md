@@ -83,7 +83,7 @@ The topology is basically like the following pic, with unrelated switches and ot
 
 ## With wireguard-deployer
 
-For my sanity I decided to write a config and key generator that yields easily deployable config tarballs, the project in mostly written during the Dragon Boat Festival, and it's open sourced [on GitHub](https://github.com/7Ji/wireguard-deployer)
+For my sanity I decided to write a config and key generator that yields easily deployable config tarballs, the project is mostly written during the Dragon Boat Festival, and it's open sourced [on GitHub](https://github.com/7Ji/wireguard-deployer)
 
 I can desribe my setup in a single .yaml file like the following:
 ```yaml
