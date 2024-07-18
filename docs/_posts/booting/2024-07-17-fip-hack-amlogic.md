@@ -9,7 +9,7 @@ categories: booting
 
 ### FIP introduction
 
-Most people call the data chunk that makes an Amlogic device bootable a "bootloader", or "u-boot", but that's far from the truth. The data chunk is actually a Firmware Image Package, or simply FIP.
+Most people call the data chunk that makes an Amlogic device bootable a "bootloader", or "u-boot", but that's far from the truth. The data chunk is actually a Firmware Image Package, or simply FIP. And U-Boot is only part of it (BL33).
 
 As per ARM Trusted Firmware Design, FIP is an archive that contains multiple parts of Trusted Firmware-A (TF-A)
 
