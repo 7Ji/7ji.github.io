@@ -879,38 +879,21 @@ Modify its config in `/etc/pacoloco.yaml`
 
 Mine looks like the following:
 ```yaml
-# cache_dir: cache
-# port: 9129
-# http_proxy: http://127.0.0.1:11091
-download_timeout: 3600 ## downloads will timeout if not completed after 3600 sec, 0 to disable timeout
-purge_files_after: 2592000 ## purge file after 30 days
-# set_timestamp_to_logs: true ## uncomment to add timestamp, useful if pacoloco is being ran through docker
-
+download_timeout: 3600
+purge_files_after: 2592000
 repos:
-  # All repos are configured with arch suffix, as pacoloco would only cache one [repo].db
-  # e.g. If there're users fetching both archlinuxcn x86_64 and archlinuxcn aarch64, they would be 
-  #    stored both under /var/cache/pacoloco/pkgs/archlinuxcn, and their db file would replace
-  #    each other, as both being /var/cache/pacoloco/pkgs/archlinuxcn/archlinuxcn.db
-  # Arch Linux: x86_64
-  archlinux:x86_64: # In case Arch Linux decides
+  archlinux:x86_64:
     urls: &urls_archlinux
-    # - http://mirrors.wsyu.edu.cn/archlinux
       - http://mirrors.ustc.edu.cn/archlinux
       - http://mirrors.tuna.tsinghua.edu.cn/archlinux
-  
-  # Arch Linux ARM: aarch64, armv7h
   archlinuxarm:aarch64:
     urls: &urls_archlinuxarm
-    #- http://mirror.archlinuxarm.org/archlinuxarm
       - http://mirrors.ustc.edu.cn/archlinuxarm
       - http://mirrors.tuna.tsinghua.edu.cn/archlinuxarm
   archlinuxarm:armv7h:
     urls: *urls_archlinuxarm
-  
-  # Arch Linux CN: aarch64, any, arm, armv6h, armv7h i686, x86_64
   archlinuxcn:aarch64:
     urls: &urls_archlinuxcn
-    #  - http://mirrors.wsyu.edu.cn/archlinuxcn
       - http://mirrors.ustc.edu.cn/archlinuxcn
       - http://mirrors.tuna.tsinghua.edu.cn/archlinuxcn
   archlinuxcn:any:
@@ -925,8 +908,6 @@ repos:
     urls: *urls_archlinuxcn
   archlinuxcn:x86_64:
     urls: *urls_archlinuxcn
-
-  # Arch 4 Edu: aarch64, any, x86_64
   arch4edu:aarch64:
     urls: &urls_arch4edu
       - http://mirrors.ustc.edu.cn/arch4edu
@@ -935,19 +916,8 @@ repos:
     urls: *urls_arch4edu
   arch4edu:x86_64:
     urls: *urls_arch4edu
-
-
-## Local/3rd party repos can be added following the below example:
-#  quarry:
-#    url: http://pkgbuild.com/~anatolik/quarry/x86_64
-
-prefetch: ## optional section, add it if you want to enable prefetching
-  cron: 0 0 3 * * * * ## standard cron expression (https://en.wikipedia.org/wiki/Cron#CRON_expression) to define how frequently prefetch, see https://github.com/gorhill/cronexpr#implementation for documentation.
-#  ttl_unaccessed_in_days: 30  ## defaults to 30, set it to a higher value than the number of consecutive days you don't update your systems
-    ## It deletes and stops prefetching packages (and db links) when not downloaded after "ttl_unaccessed_in_days" days that it has been updated.
-#  ttl_unupdated_in_days: 300 ## defaults to 300, it deletes and stops prefetching packages which haven't been either updated upstream or requested for "ttl_unupdated_in_days".
-# http_proxy: http://proxy.company.com:8888 ## Enable this if you have pacoloco running behind a proxy
-# user_agent: Pacoloco/1.2
+prefetch:
+  cron: 0 0 3 * * * *
 ```
 
 Start pacoloco
@@ -982,9 +952,7 @@ server {
     charset UTF-8;
     server_name repo.7ji.lan;
 
-    # for alarm and 3rd partys
     rewrite ^/(archlinuxarm|archlinuxcn|arch4edu)/([^/]+)/(.+)$ http://repo.fuo.lan:9129/repo/$1:$2/$2/$3 permanent;
-    # for arch official
     rewrite ^/archlinux/([^/]+)/os/([^/]+)/(.+)$ http://repo.fuo.lan:9129/repo/archlinux:$2/$1/os/$2/$3 permanent;
 
     location / {
@@ -1054,7 +1022,7 @@ Install `nftables`, the modern firewall
 sudo pacman -S nftables
 ```
 
-Modify `/etc/nftables.conf` as you like it. Notably you would need to open `dhcpv6-client` ports on WAN side if you want to limit WAN access.
+Modify `/etc/nftables.conf` as you like it. Notably you would need to open `dhcpv6-client` ports on WAN side even if you want to limit WAN access, otherwise you would not be able to get DHCPv6 routing info and prefix delegation.
 
 Mine looks like the following:
 ```nft
