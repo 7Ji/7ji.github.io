@@ -6,9 +6,13 @@ permalink: /about/
 
 ## Blog
 
-This is 7Ji's blog, where I'll write some articles about reverse-engineering and embedded development, mainly on Amlogic platforms.
+This is Guoxin "7Ji" Pu's blog.
 
-This blog is generated from the [corresponding repo](https://github.com/7Ji/7ji.github.io) on github, if you like the content, please consider starring it. If you find errors that need to be corrected, please open an issue on the [issues page](https://github.com/7Ji/7ji.github.io/issues) of the repo
+The posts here would only focus on researching stuffs, like servers configuration, environment deployment, booting, reverse-engineering, etc, but **not the following themes**:
+- Development: as I prefer to document codes in tree and write codes that need no document to explain, repeating myself everywhere is annoying and wastes my time.
+- Daily life: even though I my real name is available online, I don't want to share daily life with public, or any one not close. I don't even have any socials.
+
+This blog is generated from the [corresponding repo](https://github.com/7Ji/7ji.github.io) on github, if you like the content, please consider starring it. If you find errors that need to be corrected, please open an issue on the [issues page](https://github.com/7Ji/7ji.github.io/issues) of the repo.
 
 ## Theme
 
