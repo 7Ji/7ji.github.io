@@ -17,7 +17,7 @@ So Arch router again. I had been using Arch Linux on servers for five years, and
 
 The following are the essential components I chose for another Arch router four years ago, what I chose for the new router now instead, and, for reference, what OpenWrt uses
 
-||OpenWrt<=19|OpenWrt>=20|Retired Arch Router|New Arch Router|
+||OpenWrt<=21.02|OpenWrt>=22.03|Retired Arch Router|New Arch Router|
 |-|-|-|-|-|
 |Network Manager|UCI + netifd|UCI + netifd|Network Manager|systemd-networkd|
 |Firewall Frontend|firewall3|firewall4|-|-|
