@@ -5,6 +5,9 @@ date:   2024-09-29 17:00:00 +0800
 categories: scripting
 ---
 
+**Updated on 2024-12-27: I've written an improved way of logging without the need of `eval` calls and it's recommend to read the [new blog post](../../12/27/bash-logging-improved.html)**
+
+
 When writing some lengthy bash script, one might want the script to log with function name and line number so it would be easy to trace some error-prone logics in the future, like how you would use `__FUNCTION__` and `__LINE__` macros in C projects compiled with GCC.
 
 Luckily there're `$FUNCNAME` and `$LINENO` built-in variables. So you could write your logging statement like this:
