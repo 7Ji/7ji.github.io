@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "RTL8372-based cheap 2.5 Gbps switches are troublemakers"
+title:  "RTL8373-based cheap 2.5 Gbps switches are troublemakers"
 date:   2025-04-16 10:00:00 +0800
 categories: networking
 ---
 
-RTL8372 is great: it's the cheapest L2 network switching IC that provides 8x 2.5 Gbps ethernet ports, 1 10 Gbps SFP port, and on top of them fancy L2 management features like VLAN, Link aggregation, etc.
+RTL8373 is great: it's the cheapest L2 network switching IC that provides 8x 2.5 Gbps ethernet ports (4 with its built-in PHY, 4 with external PHYs from RTL8224), 1 10 Gbps SFP port, and on top of them fancy L2 management features like VLAN, Link aggregation, etc.
 
 From around March 2024 I've bought 5 of these switches, three of them are from Sirivision, and the remaining two from Hellotek. The price kept dropping as I bought more of them, going from around 290 CNY in March 2024 to around 210 CNY in March 2025. It's almost a steal!
 
