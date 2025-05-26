@@ -54,6 +54,23 @@ However to make a virtual machine actually boot from such root you need to go th
     ```yaml
     root / virtiofs defaults 0 0
     ```
+- If you need to use overlayfs with upperdir pointing to path inside the virtual root, the `virtiofsd` needs addtional arguments to allow xattr and keep `cap_sysadmin`:
+    ```xml
+    <filesystem type='mount' accessmode='passthrough'>
+      <driver type='virtiofs' queue='1024'/>
+      <binary path='/usr/lib/virtiofsd+sys_admin' xattr='on'/>
+      <source dir='/var/lib/libvirt/filesystems/root.arb-x64-builder'/>
+      <target dir='root'/>
+      <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
+    </filesystem>
+    ```
+    ```sh
+    > cat /usr/lib/virtiofsd+sys_admin
+    ```
+    ```sh
+    #!/bin/sh
+    exec /usr/lib/virtiofsd -o modcaps=+sys_admin "$@"
+    ```
 - If you want to share something between VMs it's not recommended to re-use the root subfoldder (which is as bad as mounting a virtual disk that is being used), just create another shared subfolder.
 
 ## Debian guest
