@@ -77,7 +77,7 @@ However to make a virtual machine actually boot from such root you need to go th
 
 - You must either install a system to a virtual disk first then extract the files, or debootstrap manually
 - If the system rootfs folder was extracted from a locally installed disk image, then `/etc/initramfs-tools/conf.d/resume` must be purged before a rerun of `update-initramfs -u`, otherwise the initrd would try to resume from the missing block device and break
-- You must include `virtiofs` in `/etc/initramfs-tools/modules` before a rerun of `update-initramfs -u` if you're preparing the initrd from a running system on virtual disk, otherwise the `virtiofs` module would not be included. (However, if you've already made it into a system running from virtiofs root and are optimizing the initrd, or are preparing the initrd from a virtiofs chroot, this could be omitted)
+- You must include `virtiofs` in `/etc/initramfs-tools/modules`, otherwise the `virtiofs` module would not be included (unfortunately initramfs-tools' hook only picks fs for a root fs mounted from a block device).
 - A run of `update-initramfs -u` is certainly needed after the above gotchas sorted out.
 - The guest kernel needs to be booted directly by hypervisor, without a bootloader, and it's recommended to use the `vmlinuz` and `initrd.img` symlinks instead of the real files:
 
