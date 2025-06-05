@@ -70,7 +70,7 @@ So on boot the intended logic that `dynamic_dns_updater` shall be spawned on int
 - The wan interface becomes ready in `netifd`
 - The `/etc/hotplug.d/iface/95-ddns` hook triggers on interface(s) that you have configured `ddns` on, and the corresponding worker(s) would be spawned.
 
-Note that the `hotplug.d` hook uses the internal name used by `netifd`. That is, an "physical" "interface" might e.g. be called as `br-lan` in the scope of Linux, but would be called `lan` in the scope of `netifd`, `uci`, `LuCI`, etc and of course `hotplug.d`. E.g.
+Note that the `hotplug.d` hook uses the internal name used by `netifd`. That is, an "physical" "interface" might e.g. be called as `br-lan` in the scope of Linux, but would be called `lan` in the scope of `netifd`, `uci`, `LuCI`, etc and of course `hotplug.d`.
 
 Now let's discuss about an "issue": many with a `PPPoE wan` might find a strange phenomenon: even though they have "enabled" the `ddns` service and configured it on `pppoe-wan` "interface", the ddns worker would not correctly start on boot on their `PPPoE wan` interface. The reason this issue happens is due to the combination of following factors:
 - In OpenWrt, software-based "interface"s are named in the style of `[protocol]-[network]`, e.g. for PPPoE-based "wan" interface/network, the actual Linux interface name that's created would be `pppoe-wan`
@@ -153,10 +153,10 @@ There are two correct way to fix the issue, one is simply LuCI-only, and another
   ```
 
 Now with this knowledge you shall know that why the following "band-aid" "hacks" seem to "fix" the "problem" but they are very unreliable.
-- By removing `boot()` function in `/etc/init.d/ddns`, you can force `/usr/lib/ddns/dynamic_dns_updater.sh -- start` to run on boot.
+- By removing `boot()` function in `/etc/init.d/ddns`, you can force `/usr/lib/ddns/dynamic_dns_updater.sh -- start` to run on boot, which would spawn workers for each configured section. The workers are there, but if another ifdown & ifup occurs then they could break. As the intended way with hotplug.d is that the worker shall be brought up after ifup and brough down before ifdown.
 - By putting `/etc/init.d/ddns restart` in your `/etc/rc.local`, you're basically doing the same thing as removing `boot()`
 - By putting both `/etc/init.d/ddns restart` in your `/etc/rc.local`, and a `sleep` before it, you have the addtional hope that `pppoe-wan` definitely becomes online after that timeout, however it's not guaranteed.
 - By removing `boot()` function in `/etc/init.d/ddns`, putting `sleep` and `/etc/init.d/ddns restart` in your `/etc/rc.local`. You're combining "band-aid"s which makes your device more and more non-reproducible.
-- Things call still fail after the above "band-aids" if your `pppoe-wan` connection is not there and you have configured `retry_max_count` for DDNS sections. If you use `hotplug.d` then the worker is guaranteed to started on `pppoe-wan` creation and stopped on `pppoe-wan` destruction.
+- Things can still fail after the above "band-aids" if your `pppoe-wan` connection is not there and you have configured `retry_max_count` for DDNS sections. If you use `hotplug.d` then the worker is guaranteed to be started on `pppoe-wan` creation and stopped on `pppoe-wan` destruction.
 
 
