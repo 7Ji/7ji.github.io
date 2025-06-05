@@ -87,7 +87,7 @@ Now let's discuss about an "issue": many with a `PPPoE wan` might find a strange
   > ip l | grep wan
   19: pppoe-wan: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1492 qdisc fq_codel state UNKNOWN mode DEFAULT group default qlen 3
   ```
-- [In luci-app-ddns](https://github.com/openwrt/luci/blob/55c93e60b4e598e81eeb1774d5d83ac32b245016/applications/luci-app-ddns/htdocs/luci-static/resources/view/ddns/overview.js#L906), the "interface" attribute is derived from the current source network/interface, e.g. when you configure "network" "wan", this would be `wan`; when you configure "interface" "pppoe-wan", this would be `pppoe-wan`:
+- [In luci-app-ddns](https://github.com/openwrt/luci/blob/55c93e60b4e598e81eeb1774d5d83ac32b245016/applications/luci-app-ddns/htdocs/luci-static/resources/view/ddns/overview.js#L899), the "interface" attribute is derived from the current source network/interface, e.g. when you configure "network" "wan", this would be `wan`; when you configure "interface" "pppoe-wan", this would be `pppoe-wan`:
   ```lua
   o = s.taboption('advanced', form.DummyValue, '_interface',
 						_("Event Network"),
@@ -109,7 +109,7 @@ Now let's discuss about an "issue": many with a `PPPoE wan` might find a strange
   ```
   # interface 	network interface used by hotplug.d i.e. 'wan' or 'wan6'
   ```
-- [In dynamic_dns_functions.sh](https://github.com/openwrt/packages/blob/08b4fcd5e6b2ec5853c7eedd548bff0d3f541fbe/net/ddns-scripts/files/usr/lib/ddns/dynamic_dns_functions.sh#L184), the `start_daemon_for_all_ddns_sections` takes the "network" name as argument and tries to get one `ddns` section with `interface` equalling it (note `wan` is the fallback name):
+- [In dynamic_dns_functions.sh](https://github.com/openwrt/packages/blob/08b4fcd5e6b2ec5853c7eedd548bff0d3f541fbe/net/ddns-scripts/files/usr/lib/ddns/dynamic_dns_functions.sh#L179), the `start_daemon_for_all_ddns_sections` takes the "network" name as argument and tries to get one `ddns` section with `interface` equalling it (note `wan` is the fallback name):
   ```sh
   # starts updater script for all given sections or only for the one given
   # $1 = interface (Optional: when given only scripts are started
