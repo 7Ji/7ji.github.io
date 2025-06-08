@@ -5,6 +5,8 @@ date:   2025-06-05 15:50:00 +0800
 categories: networking
 ---
 
+_Edit on 2025-06-08: [My patch](https://github.com/openwrt/luci/pull/7809) to fix this was merged into upstream OpenWrt LuCI master and backported to 24.10, the issue should be gone since 24.10.2._
+
 On OpenWrt, DDNS functionality is provided by the opt-in `ddns-scripts` package (and optionally `ddns-scripts-[provider]` packages), which provides both an `rc-init` script `/etc/init.d/ddns` and a `hotplug.d` hook `/etc/hotplug.d/iface/95-ddns` to start it automatically:
 - The `rc-init` script, instead of starting a "daemon" and maintaining it like other scripts that uses `procd`, mainly just calls `/usr/lib/ddns/dynamic_dns_updater.sh`, which without explicit interface names after `start/stop/reload` just double forks the workers and quits. Note it has an empty `boot()` function which shadows `start()` on boot, i.e. `/usr/lib/ddns/dynamic_dns_updater.sh -- start` would not be run on boot.
 
