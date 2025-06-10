@@ -14,6 +14,8 @@ The posts here would only focus on researching stuffs, like servers configuratio
 
 This blog is generated from the [corresponding repo](https://github.com/7Ji/7ji.github.io) on github, if you like the content, please consider starring it. If you find errors that need to be corrected, please open an issue on the [issues page](https://github.com/7Ji/7ji.github.io/issues) of the repo.
 
+The posts here are licensed under [CC0 1.0 Universal](https://github.com/7Ji/7ji.github.io/blob/main/LICENSE).
+
 ## Theme
 
 This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
