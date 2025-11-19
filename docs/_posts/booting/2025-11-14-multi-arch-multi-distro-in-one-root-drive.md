@@ -1046,8 +1046,23 @@ The final Grub menu shall look like this:
 
 Now it's good time to do modification, to e.g. decorate the outer menu, reorder the menu, add more entries, etc.
 
-Also note that I did not set timeout, for that booting default x86_64 on aarch64 is plainly wrong. This could be improved by either one of the following ways:
+Also note that I did not set timeout, for that booting default x86_64 on aarch64 is plainly wrong, and this blog was written as simple to follow as posisble. This could be improved by either one of the following ways:
 - Use seperate --boot-directory e.g. `/efi/x86_64` and `/efi/aarch64` and maintain sepearate outer grub.cfg for each architecture
-- Use `$grub_platform` variable and `cpuid` (x86_64) / `fdtdump` (aarch64) command to determine the current platform, but this is not a guaranteed hit
-
-For simplicity I would keep my current configu without default entry and timout logic.
+- Use `$grub_platform` variable and `$grub_cpu` to determine the current platform. If you'd want to try, the syntax shall look like this:
+    ```
+    set timeout 1
+    if [ "${grub_cpu}" = 'x86_64' -a "${grub_platform}" = 'efi' ]; then
+        # x86_64 UEFI Secure Boot only
+        menuentry ...
+    elif [ "${grub_cpu}" = 'x86_64' -o "${grub_cpu}" = 'i386']; then
+        # x86_64 UEFI plain, or legacy
+        menuentry ...
+    elif [ "${grub_cpu}" = 'arm64' ]; then
+        if [ "${grub_platform}" = 'efi' ]; then
+            # arm64 UEFI Secure Boot only
+            menuentry ...
+        fi
+        # arm64 plain
+        menuentry ...
+    fi
+    ```
