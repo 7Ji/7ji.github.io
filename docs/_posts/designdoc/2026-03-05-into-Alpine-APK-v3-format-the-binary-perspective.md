@@ -75,7 +75,7 @@ In the package case, a series of `ADB block`s would continue one after another, 
 
 Each block starts with a `u32` recording the type and optionally the size, itself as either a simple header, or as the first member of a bigger 16-byte header
 
-- If the highest 2 bits are not all `0`, then this is a simple 4-byte header
+- If the highest 2 bits are not all `1` (so either `0b00`, `0b01`, `0b10`, but not `0b11`), then this is a simple 4-byte header
   - Type is these 2 bits extracted, i.e. `v >> 30`
   - Raw size for this block (4-byte header included) is the low 30 bits, i.e. `v & 0x3fffffff`
 - If the highest 2 bits are all `1`, then this is an extended 16-byte header, including the 4-byte u32 `v` itself as `type_size` field, a 4-byte u32 reserved field for alignment for future expansion, and a 8-byte u64 `x_size` field, defined in C as:
