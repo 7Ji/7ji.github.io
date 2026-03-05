@@ -197,7 +197,7 @@ These slots are numbered as follows:
 
 So e.g. the first element, `u32(body[4808:4812]) == 0x80000008`, is not zero, means the package has an actual name, the high `0x8` means this is a `BLOB_8` item, and the low `0x8` means the item's length is at offset 8 and content starts at offset 9, so, `length == u8(body[12+8]) == 8`, and therefore content is at `body[12+9:12+9+8] == body[21:29]`, the example package is `crowdsec`
 
-And e.g. the last element ID 16 `u32(body[4868:4872]) == 0xe0000184`, is not zero, means the package has an actual `provides` `OBJECT` (`0xe0...`), offset `0x184 == 388` in payload, so `u32(body[12+388:12+388+4]) == u32(body[400:404]) == 2` records the number of sub-elements including the count itself, therefore 1 actual element, `adb_val_t(body[404:408])` therefore records the info of the only sub-element, here being `0xe000017c` means it's yet another `OBJECT` starting at offset `0x17c`, ..., and then `u32(body[392:396]) == 2` so there's again 1 real sub-element, `abl_val_t(body[396:400]) == 0x8000016c` means this is a BLOB8 starting at `0x16c`, then we get length from `u8(body[12+0x16c]) == 12`, and finally the provide item at `body[12+0x16c+1:+12] == body[377:389]`, being `crowdsec-any`
+And e.g. the last element ID 16 `u32(body[4868:4872]) == 0xe0000184`, is not zero, means the package has an actual `provides` `OBJECT` (`0xe0...`), offset `0x184 == 388` in payload, so `u32(body[12+388:12+388+4]) == u32(body[400:404]) == 2` records the number of sub-elements including the count itself, therefore 1 actual element, `adb_val_t(body[404:408])` therefore records the info of the only sub-element, here being `0xe000017c` means it's yet another `OBJECT` starting at offset `0x17c`, ..., and then `u32(body[392:396]) == 2` so there's again 1 real sub-element, `adb_val_t(body[396:400]) == 0x8000016c` means this is a BLOB8 starting at `0x16c`, then we get length from `u8(body[12+0x16c]) == 12`, and finally the provide item at `body[12+0x16c+1:+12] == body[377:389]`, being `crowdsec-any`
 
 While the `provides` seems a list of list of BLOB8, but recall that `OBJECT` elements can be different types, each element in `provides` is actually a strongly-typed dep info, containing the `NAME` slot (BLOB8, ID1), `VERSION` slot (BLOB8, ID2), and `MATCH` slot (INT, ID3, for vercmp operations). In the example there's just no `VERSION` nor `MATCH`.
 
@@ -250,11 +250,11 @@ Each one of these 21 "path"s is actually called `ADBI_DI` by `apk-tools`, and is
 |2|ACL|OBJECT being ACL info (see below)|
 |3|FILES|OBJECT of File info (see below)|
 
-In the example the last "path" `abl_val_t(body[4956:4960]) == 0xe0001290`, so it's an `OBJECT` starting from `12 + 0x1290 == 4764`, as `u32(body[4764:4768]) == 4` there're 3 slots after it.
+In the example the last "path" `adb_val_t(body[4956:4960]) == 0xe0001290`, so it's an `OBJECT` starting from `12 + 0x1290 == 4764`, as `u32(body[4764:4768]) == 4` there're 3 slots after it.
 
-For ID 1, NAME, `abl_val_t(body[4768:4772]) == 0x80001258`, it's a `BLOB8` starting at offset `0x1258`, and `u8(body[12+0x1258]) == u8(body[4708]) == 7` says this is a 7-length string, content at `body[4708+1:7] == body[4709:4716] == b"usr/bin"` says the folder name/path is `usr/bin`
+For ID 1, NAME, `adb_val_t(body[4768:4772]) == 0x80001258`, it's a `BLOB8` starting at offset `0x1258`, and `u8(body[12+0x1258]) == u8(body[4708]) == 7` says this is a 7-length string, content at `body[4708+1:7] == body[4709:4716] == b"usr/bin"` says the folder name/path is `usr/bin`
 
-For ID2, ACL, `abl_val_t(body[4772:4776]) == 0xe0000194`, it's an `OBJECT` starting at offset `0x194`, the count `u32(body[12+0x194:+4]) == u32(body[416:420]) == 4` so there're 3 slots after it.
+For ID2, ACL, `adb_val_t(body[4772:4776]) == 0xe0000194`, it's an `OBJECT` starting at offset `0x194`, the count `u32(body[12+0x194:+4]) == u32(body[416:420]) == 4` so there're 3 slots after it.
 
 The ACL info OBJECT could have the following slots:
 
@@ -271,9 +271,9 @@ In the example:
 - SLOT3 reads the same value so it reuses `root` from `USER`
 - There's not SLOT4
 
-For ID3, FILES, `abl_val_t(body[4776:4780]) == 0xe0001260`, it's an `OBJECT` starting at offset `0x1260`, the count `u32(body[12+0x1260:+4]) == u32(body[4716:4720]) == 12`, so there're 11 file entries after it, the first at `body[4720:4724]` and the last at `body[4760:4764]`.
+For ID3, FILES, `adb_val_t(body[4776:4780]) == 0xe0001260`, it's an `OBJECT` starting at offset `0x1260`, the count `u32(body[12+0x1260:+4]) == u32(body[4716:4720]) == 12`, so there're 11 file entries after it, the first at `body[4720:4724]` and the last at `body[4760:4764]`.
 
-The first file entry, `abl_val_t(body[4720:4724]) == 0xe0000f4c`, it's an `OBJECT` starting at offset `0xf4c`, the count `u32(body[12+0xf4c:+4]) == u32(body[3928:3932]) == 6`, so there're 5 slots after it.
+The first file entry, `adb_val_t(body[4720:4724]) == 0xe0000f4c`, it's an `OBJECT` starting at offset `0xf4c`, the count `u32(body[12+0xf4c:+4]) == u32(body[3928:3932]) == 6`, so there're 5 slots after it.
 
 The File info OBJECT could have the following slots:
 
@@ -294,9 +294,23 @@ In the example:
 - SLOT5 reads `0x80000f28` so it's an `BLOB8` with length at offset 0xf28, `u8(body[12+0xf28]) == 32`, and content `body[12+0xf28+1:+32]` reads a hex-string, which is the SHA256 checksum of the file
 - There's no SLOT6, as this is a regular file
 
-A file can have its `SIZE` set to 0, being an empty file, and on top of it having `TARGET` set, so it serves as a symlink to the set target.
+A file can have its `SIZE` set to 0, being an empty file, and on top of it having `TARGET` set, so it either serves as a symlink or hardlink to the set target, or is a special `CHAR` / `DEV`.
 
-When reading through the `PATH`s info it's recommended to store them for later lookup, as the `ADB_BLOCK_DATA` blocks would only carry the file content, but not the names, paths, ownership, etc.
+Let's use the third file entry under the same last path entry to examine what `TARGET` does, which is `adb_val_t(body[4728:4732]) == 0xe0000fdc`, it's an OBJECT with offset 0xfdc, we read `u32(body[12+0xfdc:+4]) == u32(body[4072:4076]) == 7` so it does have 6th slot for `TARGET`; we read the name `adb_val_t(body[4076:4090]) == 0x80000fac` so name starts at offset 0xfac and `len == u8(body[12+0xfac]) == u8(body[4024]) == 5`, content is `body[4024+1:+5] == body[4025:4030] == b"cscli"`, so the link itself is `usr/bin/cscli`; we skip to SLOT 6 for `TARGET` which should be `adb_val_t(body[12 + 0xfdc + 4 * 6:+4]) == adb_val_t(body[4096:4100]) == 0x80000fb2`, so it's a BLOB with offset `0xfb2`, then we read length at `u8(body[12+0xfb2]) == u8(body[4030]) == 23` so content is `body[4030+1:+23] == body[4031:4054] == b"\x00\xa0/usr/bin/crowdsec-cli"`
+
+The first two bytes in the `TARGET` determines the data type, and they shall be handled as one u16, and `u16(body[4031:4033]) == 40960 == 0o120000`, this is basically the same thing as you would expect from the `st_mode` field in a `struct stat` with already `S_IFMT` been bitwise AND. The following file type are supported:
+
+|Type|Mask|Content at target[2:]|
+|-|-|-|
+|S_IFBLK|0o060000|8-byte, as u64 for dev ID (major:minor combined)|
+|S_IFCHR|0o020000|8-byte, as u64 for dev ID (major:minor combined)|
+|S_IFIFO|0o010000|8-byte, as u64 for dev ID (major:minor combined)|
+|S_IFLNK|0o120000|any-length, for symlink target|
+|S_IFREG|0o100000|any-length, for hardlink target|
+
+The real target for symlink is therefore `target[2:]`, so we know this symlink is `usr/bin/csli -> /usr/bin/crowdsec-cli`
+
+**When reading through the `PATH`s info it's recommended to store them for later lookup, as the `ADB_BLOCK_DATA` blocks would only carry the file content, but not the names, paths, ownership, etc.**
 
 ### The signature block `ADB_BLOCK_SIG`
 
