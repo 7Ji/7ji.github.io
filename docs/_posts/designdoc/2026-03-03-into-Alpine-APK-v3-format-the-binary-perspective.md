@@ -49,20 +49,21 @@ The compressed `ADB` data body shall be **a plain stream without magic header** 
 
 Note while Deflate stream can be concatenated to each other, which is used in `apk v2`, the `apk v3` body should be a whole continous Deflate stream if it was compressed with such algorithm. _I didn't test this but I think the official tool would happily accept a manually prepared `apk v3` with multiple concatenated Deflate stream_. **Zstandard on the other hand does not support concatenated streams.**
 
-The body, when decompressed, shall begin with exactly `adb.`, same as uncompressed `apk v3`, 3-byte magic and 1-byte marking no compression.
+The body, when decompressed, shall begin with exactly `ADB.`, same as uncompressed `apk v3`, 3-byte magic and 1-byte marking no compression.
 
 With the example apk the body shall be decompressed with:
 
 ```python
 import zlib
 with open('crowdsec-1.6.2-r1.apk', 'rb') as f:
-    f.read(4)
-    body=zlib.decompress(f.read(), wbits=-15)
+    assert(f.read(4) == b'ADBd')
+    body = zlib.decompress(f.read(), wbits=-zlib.MAX_WBITS)
+assert(body[0:8] == b'ADB.pckg')
 ```
 
 ### Top-level schema
 
-After the leading `adb.` in either the original uncompressed file or the decompresssed body, a 4-byte (`u32(body[4:8])`) magic (called `schema`) would mark the inner data as one of the following:
+After the leading `ADB.` in either the original uncompressed file or the decompresssed body, a 4-byte (`u32(body[4:8])`) magic (called `schema`) would mark the inner data as one of the following:
 
 - `0x676B6370` or big-endian `0x70636B67` or literal `pckg` for package
 - `0x78646E69` or big-endian `0x696E6478` or literal `indx` for index
