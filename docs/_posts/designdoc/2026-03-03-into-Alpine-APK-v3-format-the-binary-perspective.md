@@ -163,8 +163,8 @@ Now is a good time to list all possible data types, which can all be possibly us
 |ADB_TYPE_INT_32|0x20000000|Single u32 at low-as-off|
 |ADB_TYPE_INT_64|0x30000000|Single u32 at low-as-off|
 |ADB_TYPE_BLOB_8|0x80000000|Series of u8, length (u8) + data (u8s) at low-as-off|
-|ADB_TYPE_BLOB_16|0x90000000|Series of u16, length (u16) + data (u16s) at low-as-off|
-|ADB_TYPE_BLOB_32|0xa0000000|Series of u32, length (u32) + data (u32s) at low-as-off|
+|ADB_TYPE_BLOB_16|0x90000000|Series of u8, length (u16) + data (u8s) at low-as-off|
+|ADB_TYPE_BLOB_32|0xa0000000|Series of u8, length (u32) + data (u8s) at low-as-off|
 |ADB_TYPE_ARRAY|0xd0000000|Series of same type, length (u32) + data at low-as-off|
 |ADB_TYPE_OBJECT|0xe0000000|Series of different type, length (u32) + data at low-as-off|
 
@@ -174,41 +174,41 @@ These slots are numbered as follows:
 
 |ID|Name|Data Type|
 |-|-|-|
-|1|NAME|BLOB_8, as string|
-|2|VERSION|BLOB_8, as string|
-|3|HASHES|BLOB_8, as hex-string|
-|4|DESCRIPTION|BLOB_8, as string|
-|5|ARCH|BLOB_8, as string|
-|6|LICENSE|BLOB_8, as string|
-|7|ORIGIN|BLOB_8, as string|
-|8|MAINTAINER|BLOB_8, as string|
-|9|URL|BLOB_8, as string|
-|10|REPO_COMMIT|BLOB_8, as hex-string|
-|11|BUILD_TIME|INT|
-|12|INSTALLED_SIZE|INT|
-|13|FILE_SIZE|INT|
-|14|PROVIDER_PRIORITY|INT|
+|1|NAME|BLOB, usually BLOB_8, as string|
+|2|VERSION|BLOB, usually BLOB_8, as string|
+|3|HASHES|BLOB, usually BLOB_8, as hex-string|
+|4|DESCRIPTION|BLOB, usually BLOB_8, as string|
+|5|ARCH|BLOB, usually BLOB_8, as string|
+|6|LICENSE|BLOB, usually BLOB_8, as string|
+|7|ORIGIN|BLOB, usually BLOB_8, as string|
+|8|MAINTAINER|BLOB, usually BLOB_8, as string|
+|9|URL|BLOB, usually BLOB_8, as string|
+|10|REPO_COMMIT|BLOB, usually BLOB_8, as hex-string|
+|11|BUILD_TIME|INT, usually embedded|
+|12|INSTALLED_SIZE|INT, usually embedded|
+|13|FILE_SIZE|INT, usually embedded|
+|14|PROVIDER_PRIORITY|INT, usually embedded|
 |15|DEPENDS|OBJECT of dependency (see below)|
 |16|PROVIDES|OBJECT of dependency (see below)|
 |17|REPLACES|OBJECT of dependency (see below)|
 |18|INSTALL_IF|OBJECT of dependency (see below)|
 |19|RECOMMENDS|OBJECT of dependency (see below)|
-|20|LAYER|INT|
-|21|TAGS|OBJECT of BLOB_8, as string array|
+|20|LAYER|INT, usually embedded|
+|21|TAGS|OBJECT of BLOB, usually BLOB_8, as string array|
 
 So e.g. the first element, `u32(body[4808:4812]) == 0x80000008`, is not zero, means the package has an actual name, the high `0x8` means this is a `BLOB_8` item, and the low `0x8` means the item's length is at offset 8 and content starts at offset 9, so, `length == u8(body[12+8]) == 8`, and therefore content is at `body[12+9:12+9+8] == body[21:29]`, the example package is `crowdsec`
 
-And e.g. the last element ID 16 `u32(body[4868:4872]) == 0xe0000184`, is not zero, means the package has an actual `provides` `OBJECT` (`0xe0...`), offset `0x184 == 388` in payload, so `u32(body[12+388:12+388+4]) == u32(body[400:404]) == 2` records the number of sub-elements including the count itself, therefore 1 actual element, `adb_val_t(body[404:408])` therefore records the info of the only sub-element, here being `0xe000017c` means it's yet another `OBJECT` starting at offset `0x17c`, ..., and then `u32(body[392:396]) == 2` so there's again 1 real sub-element, `adb_val_t(body[396:400]) == 0x8000016c` means this is a BLOB8 starting at `0x16c`, then we get length from `u8(body[12+0x16c]) == 12`, and finally the provide item at `body[12+0x16c+1:+12] == body[377:389]`, being `crowdsec-any`
+And e.g. the last element ID 16 `u32(body[4868:4872]) == 0xe0000184`, is not zero, means the package has an actual `provides` `OBJECT` (`0xe0...`), offset `0x184 == 388` in payload, so `u32(body[12+388:12+388+4]) == u32(body[400:404]) == 2` records the number of sub-elements including the count itself, therefore 1 actual element, `adb_val_t(body[404:408])` therefore records the info of the only sub-element, here being `0xe000017c` means it's yet another `OBJECT` starting at offset `0x17c`, ..., and then `u32(body[392:396]) == 2` so there's again 1 real sub-element, `adb_val_t(body[396:400]) == 0x8000016c` means this is a BLOB_8 starting at `0x16c`, then we get length from `u8(body[12+0x16c]) == 12`, and finally the provide item at `body[12+0x16c+1:+12] == body[377:389]`, being `crowdsec-any`
 
-While the `provides` seems a list of list of BLOB8, but recall that `OBJECT` elements can be different types, each element in `provides` is actually a strongly-typed dep info, containing the `NAME` slot (BLOB8, ID1), `VERSION` slot (BLOB8, ID2), and `MATCH` slot (INT, ID3, for vercmp operations). In the example there's just no `VERSION` nor `MATCH`.
+While the `provides` seems a list of list of BLOB_8, but recall that `OBJECT` elements can be different types, each element in `provides` is actually a strongly-typed dep info, containing the `NAME` slot (BLOB_8, ID1), `VERSION` slot (BLOB_8, ID2), and `MATCH` slot (INT, ID3, for vercmp operations). In the example there's just no `VERSION` nor `MATCH`.
 
 All dependency-like element can have these 3 slots:
 
 |ID|Name|Data Type|
 |-|-|-|
-|1|NAME|BLOB8, string|
-|2|VERSION|BLOB8, string|
-|3|MATCH|INT|
+|1|NAME|BLOB, usually BLOB_8, string|
+|2|VERSION|BLOB, usually BLOB_8, string|
+|3|MATCH|INT, usually embedded|
 
 The `MATCH` field is a bitwise OR of the following base bits:
 
@@ -247,13 +247,13 @@ Each one of these 21 "path"s is actually called `ADBI_DI` by `apk-tools`, and is
 
 |ID|NAME|Data Type|
 |-|-|-|
-|1|NAME|BLOB8, string|
+|1|NAME|BLOB, usually BLOB_8, string|
 |2|ACL|OBJECT being ACL info (see below)|
 |3|FILES|OBJECT of File info (see below)|
 
 In the example the last "path" `adb_val_t(body[4956:4960]) == 0xe0001290`, so it's an `OBJECT` starting from `12 + 0x1290 == 4764`, as `u32(body[4764:4768]) == 4` there're 3 slots after it.
 
-For ID 1, NAME, `adb_val_t(body[4768:4772]) == 0x80001258`, it's a `BLOB8` starting at offset `0x1258`, and `u8(body[12+0x1258]) == u8(body[4708]) == 7` says this is a 7-length string, content at `body[4708+1:7] == body[4709:4716] == b"usr/bin"` says the folder name/path is `usr/bin`
+For ID 1, NAME, `adb_val_t(body[4768:4772]) == 0x80001258`, it's a `BLOB_8` starting at offset `0x1258`, and `u8(body[12+0x1258]) == u8(body[4708]) == 7` says this is a 7-length string, content at `body[4708+1:7] == body[4709:4716] == b"usr/bin"` says the folder name/path is `usr/bin`
 
 For ID2, ACL, `adb_val_t(body[4772:4776]) == 0xe0000194`, it's an `OBJECT` starting at offset `0x194`, the count `u32(body[12+0x194:+4]) == u32(body[416:420]) == 4` so there're 3 slots after it.
 
@@ -261,14 +261,14 @@ The ACL info OBJECT could have the following slots:
 
 |ID|NAME|Data Type|
 |-|-|-|
-|1|MODE|INT|
-|2|USER|BLOB8, string|
-|3|GROUP|BLOB8, string|
-|4|XATTRS|OBJECT of BLOB8, each BLOB8 with `\0` as sep for name and value|
+|1|MODE|INT, usually embedded|
+|2|USER|BLOB, usually BLOB_8, string|
+|3|GROUP|BLOB, usually BLOB_8, string|
+|4|XATTRS|OBJECT of BLOB, usually BLOB_8, each BLOB_8 with `\0` as sep for name and value|
 
 In the example:
 - SLOT1 reads `0x100001ed` so it's an `INT` with value `0x1ed == 0o755`
-- SLOT2 reads `0x8000018c` so it's an `BLOB8` starting at offset `0x18c`, length at `body[408]` reads `4` and content at `body[409:413]` reads `root`
+- SLOT2 reads `0x8000018c` so it's an `BLOB_8` starting at offset `0x18c`, length at `body[408]` reads `4` and content at `body[409:413]` reads `root`
 - SLOT3 reads the same value so it reuses `root` from `USER`
 - There's not SLOT4
 
@@ -280,19 +280,19 @@ The File info OBJECT could have the following slots:
 
 |ID|NAME|Data Type|
 |-|-|-|
-|1|NAME|BLOB8, string|
+|1|NAME|BLOB, usually BLOB_8, string|
 |2|ACL|OBJECT being ACL info (see above)|
-|3|SIZE|INT|
-|4|MTIME|INT32|
-|5|HASHES|BLOB8, hex-string|
-|6|TARGET|BLOB8, string|
+|3|SIZE|INT, usually embedded|
+|4|MTIME|INT, usually INT32|
+|5|HASHES|BLOB, usually BLOB_8, hex-string|
+|6|TARGET|BLOB, usually BLOB_8, string|
 
 In the example:
-- SLOT1 reads `0x80000008` so it's an `BLOB8` with length at offset 8, `u8(body[12+8]) == 8`, and content `body[12+8+1:+8] == b"crowdsec"`
+- SLOT1 reads `0x80000008` so it's an `BLOB_8` with length at offset 8, `u8(body[12+8]) == 8`, and content `body[12+8+1:+8] == b"crowdsec"`
 - SLOT2 reads `0xe0000194` so it's again `0o755` owned by `root:root`
 - SLOT3 reads `0x133cd7e8` so it's an `INT` with value `0x33cd7e8 == 54319080`
 - SLOT4 reads `0x200001e4` so it's an `INT_32` at offset `0x1e4`, and `u32(body[12+0x1e4:+4]) == 1772344484` so mtime is `Sun Mar  1 05:54:44 UTC 2026`
-- SLOT5 reads `0x80000f28` so it's an `BLOB8` with length at offset 0xf28, `u8(body[12+0xf28]) == 32`, and content `body[12+0xf28+1:+32]` reads a hex-string, which is the SHA256 checksum of the file
+- SLOT5 reads `0x80000f28` so it's an `BLOB_8` with length at offset 0xf28, `u8(body[12+0xf28]) == 32`, and content `body[12+0xf28+1:+32]` reads a hex-string, which is the SHA256 checksum of the file
 - There's no SLOT6, as this is a regular file
 
 A file can have its `SIZE` set to 0, being an empty file, and on top of it having `TARGET` set, so it either serves as a symlink or hardlink to the set target, or is a special `CHAR` / `DEV`.
