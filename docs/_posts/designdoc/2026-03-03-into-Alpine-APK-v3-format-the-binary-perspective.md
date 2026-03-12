@@ -161,7 +161,7 @@ Now is a good time to list all possible data types, which can all be possibly us
 |ADB_TYPE_SPECIAL|0x00000000|Currently just alias to `INT`|
 |ADB_TYPE_INT|0x10000000|Single u32 (max 0x0fffffff) value in low|
 |ADB_TYPE_INT_32|0x20000000|Single u32 at low-as-off|
-|ADB_TYPE_INT_64|0x30000000|Single u32 at low-as-off|
+|ADB_TYPE_INT_64|0x30000000|Single u64 at low-as-off|
 |ADB_TYPE_BLOB_8|0x80000000|Series of u8, length (u8) + data (u8s) at low-as-off|
 |ADB_TYPE_BLOB_16|0x90000000|Series of u8, length (u16) + data (u8s) at low-as-off|
 |ADB_TYPE_BLOB_32|0xa0000000|Series of u8, length (u32) + data (u8s) at low-as-off|
@@ -241,7 +241,7 @@ So e.g. a match field with value `0x10000003` would mean `INT` with value `0x3 =
 
 Files and folders are stored in `ADB_BLOCK_ADB` in a compact way, before the latter possible file data appearance in `ADB_BLOCK_DATA` blocks. Each of these path elements stores a folder path without the leading / (_empty path for root folder_), then any number of direct file entries. While most of the file entries do need their `ADB_BLOCK_DATA` block for actual data, others could exist purely in header.
 
-ID 1 in `ADB_BLOCK_ADB`'s root object, which marks the head of paths, is yet another object, e.g. `root_obj[2] == body[5652:5656] ==  0xe00012fc`, means an object with offset 0x12fc, and `u32(body[12+0x12fc:+4]) == u32(body[4872:4876]) == 22` means there're 21 `adb_val_t` after the count u32, 1st at `body[4872+4*1:+4] == body[4876:4880]` and 21st at `body[4872+4*21:+4] == body[4956:4960]`
+ID 2 in `ADB_BLOCK_ADB`'s root object, which marks the head of paths, is yet another object, e.g. `root_obj[2] == body[5652:5656] ==  0xe00012fc`, means an object with offset 0x12fc, and `u32(body[12+0x12fc:+4]) == u32(body[4872:4876]) == 22` means there're 21 `adb_val_t` after the count u32, 1st at `body[4872+4*1:+4] == body[4876:4880]` and 21st at `body[4872+4*21:+4] == body[4956:4960]`
 
 Each one of these 21 "path"s is actually called `ADBI_DI` by `apk-tools`, and is also an `OBJECT` with the following slots (still, some are optional):
 
@@ -312,6 +312,38 @@ The first two bytes in the `TARGET` determines the data type, and they shall be 
 The real target for symlink is therefore `target[2:]`, so we know this symlink is `usr/bin/csli -> /usr/bin/crowdsec-cli`
 
 **When reading through the `PATH`s info it's recommended to store them for later lookup, as the `ADB_BLOCK_DATA` blocks would only carry the file content, but not the names, paths, ownership, etc.**
+
+### ADBI_PKG_SCRIPTS: scripts
+
+ID 3 in the `ADB_BLOCK_ADB` is `ADBI_PKG_SCRIPTS` which is an OBJECT with multiple `BLOB`s for package pre/post scripts.
+
+e.g. `root_obj[3] == body[5656:5660] == 0xe00015e0`, means an object with offset 0x15e0, and `u32(body[12+0x15e0:+4]) == u32(body[5612:5616]) == 8` means there're 7 `adb_val_t` after the count u32, 1st at `body[5612+4*1:+4] == body[5616:5620]` and 21st at `body[5612+4*7:+4] == body[5640:5644]`
+
+The scripts OBJECT could have the following slots
+
+|ID|NAME|
+|1|TRIGGER|
+|2|PREINST|
+|3|POSTINST|
+|4|PREDEINST|
+|5|POSTDEINST|
+|6|PREUPGRADE|
+|7|POSTUPGRADE|
+
+The example package has only `3/POSTINST`, `4/PREDEINST` and `7/POSTUPGRADE`. Take the last slot for example, `u32(body[5640:5644])` reads `0x800014e4` so it's `BLOB_8` with offset `0x14e4`, read `u8(body[12+0x14e4]) == 251` so length is 251, therefore content is `body[12+0x14e4+1:+251] == body[5361:5612]`, `b'#!/bin/sh\nexport PKG_UPGRADE=1\n[ "${IPKG_NO_SCRIPT}" = "1" ] && exit 0\n[ -s ${IPKG_INSTROOT}/lib/functions.sh ] || exit 0\n. ${IPKG_INSTROOT}/lib/functions.sh\nexport root="${IPKG_INSTROOT}"\nexport pkgname="crowdsec"\nadd_group_and_user\ndefault_postinst\n'`, which prints as:
+
+```sh
+#!/bin/sh
+export PKG_UPGRADE=1
+[ "${IPKG_NO_SCRIPT}" = "1" ] && exit 0
+[ -s ${IPKG_INSTROOT}/lib/functions.sh ] || exit 0
+. ${IPKG_INSTROOT}/lib/functions.sh
+export root="${IPKG_INSTROOT}"
+export pkgname="crowdsec"
+add_group_and_user
+default_postinst
+
+```
 
 ### The signature block `ADB_BLOCK_SIG`
 
