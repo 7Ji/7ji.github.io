@@ -27,7 +27,7 @@ The below uses [openwrt/25.12.0-rc5/crowdsec-1.6.2-r1.apk](http://downloads.open
 
 ### File Header
 
-The file header is 4 bytes in length, first 3 bytes being magic `"ADB"`, i.e. big-endian `0x616462`, then the last byte is either one of the following to tell the file compression method:
+The file header is 4 bytes in length, first 3 bytes being magic `"ADB"`, i.e. big-endian `0x414442`, then the last byte is either one of the following to tell the file compression method:
 
 - `.`, i.e. `0x2e`, means the content is not compressed
 - `d`, i.e. `0x64`, means the conetnt is compressed with Deflate level 0
