@@ -330,7 +330,7 @@ The scripts OBJECT could have the following slots
 |6|PREUPGRADE|
 |7|POSTUPGRADE|
 
-All names except `TRIGGER` should tell the purpose just by its name. The `TRIGGER` one is special as it would be triggered on changes to paths listed in latter `ADBI_POK_TRIGGERS`.
+All names except `TRIGGER` should tell the purpose just by its name. The `TRIGGER` one is special as it would be triggered on changes to paths listed in latter `ADBI_PKG_TRIGGERS`.
 
 The example package has only `3/POSTINST`, `4/PREDEINST` and `7/POSTUPGRADE`. Take the last slot for example, `u32(body[5640:5644])` reads `0x800014e4` so it's `BLOB_8` with offset `0x14e4`, read `u8(body[12+0x14e4]) == 251` so length is 251, therefore content is `body[12+0x14e4+1:+251] == body[5361:5612]`, `b'#!/bin/sh\nexport PKG_UPGRADE=1\n[ "${IPKG_NO_SCRIPT}" = "1" ] && exit 0\n[ -s ${IPKG_INSTROOT}/lib/functions.sh ] || exit 0\n. ${IPKG_INSTROOT}/lib/functions.sh\nexport root="${IPKG_INSTROOT}"\nexport pkgname="crowdsec"\nadd_group_and_user\ndefault_postinst\n'`, which prints as:
 
@@ -377,6 +377,8 @@ The hash algorithm could be one of the following:
 
 The missing ID1 was MD5 whose support was dropped in apk-tools.
 
+And currently `apk-tools` would only use `SHA512` for both signing and verifying.
+
 If this have a valid, non-`NONE` hash_alg, then the actual payload should (after the 2-byte header) be followed by a 16-byte ID, and the corresponding length of signature, defined in C as:
 
 ```c
@@ -388,6 +390,17 @@ struct adb_sign_v0 {
 ```
 
 In the example file there's no `SIG` block.
+
+When testing signing with `apk-tools` (which can re-sign an unsigned v3 apk), the private key file `--sign-key` shall be an OpenSSL private key, which could be generated via e.g. `openssl genrsa -aes256 -out /tmp/private.pem 4096`, in which `-aes256` could be omitted if you don't want password. However as this is a temporary key not in pool, the command should look like `apk adbsign --allow-untrusted --sign-key /tmp/private.pem crowdsec-1.6.2-r1.apk.resigned`
+
+The size of `sig[]` part shall follow what the key specifies, e.g. for the above `rsa4096` key, the signature shall be 512 bytes, and it might be `PKCS#1` message but as this is only testing with temporary key I can't confirm the official repo signing method.
+
+The following is output from `adumpk`:
+
+```
+DEBUG... AdbBlock(type_block=<AdbBlockType.SIG: 1>, size_raw=534, size_payload=530)
+INFO.... Hash sha512, 64 bytes, ID 290fb2a94d29dda681301285226e604d: CQT7OfNPmxt6XtW3s1iV5N6DtGlfkVYKYsjKn4LKsRmYW0RjTXhZ12bexzmcx7zIQqs9VMZYyN9ovCobYhnUDikR5an2FoUYIJ9oJAEm3FdS1Q5L0m7mSqssO6SP/Y8dK7G1wgnlvTLgKOQ4gWjVogOLCDFk2j/B15NmGMS3rS7hcYNPhn7SuDTBMzNM6jMNoe0ElYznFCZYEUw89Ow1rD602/sIhO6eZwuTrgsFBq6dBLLiOZ863ufiKnUVNW1PijmdPh730L8aqnlm1Jdro+eN4A5Af5zDsqobPaRlE1Rs/7UzTBozDAIcoPWTjtVkBUqEw8SWMdeAQnlBKkiOGmq5uGsM/KvgZb+NthME5YcsbWJLineVCuZ/iVZCAtSbKvFlPKRpwk385YnA/LMfdIuR7dsZQLjpzEdgYC5/57O/CWOs7WvBI4jXi0wiTqbEHKKSHhlmnJI7DdTwAesE86G5lgxqamnxIuG9xjD6Cm6l9fPYR3dcVAFl76FuLSLzDuT4J51o48F4MvlyfJIt5a+Thoknvhcg4OXEAJMg5tOc5uWU+TV1cllLqkeyAh1qxUCbol4mU5ZLctgMYGsSnCxISuDXNDy6k6D/m3ilz+9BOIrfKM2C6z7SBvCzmoezCMkr2oBdGHbgguSj9vkwwLXHzMbY7AZXRb0UQ3fIml4=
+```
 
 ### The data block `ADB_BLOCK_DATA`
 
