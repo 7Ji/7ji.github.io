@@ -330,6 +330,8 @@ The scripts OBJECT could have the following slots
 |6|PREUPGRADE|
 |7|POSTUPGRADE|
 
+All names except `TRIGGER` should tell the purpose just by its name. The `TRIGGER` one is special as it would be triggered on changes to paths listed in latter `ADBI_POK_TRIGGERS`.
+
 The example package has only `3/POSTINST`, `4/PREDEINST` and `7/POSTUPGRADE`. Take the last slot for example, `u32(body[5640:5644])` reads `0x800014e4` so it's `BLOB_8` with offset `0x14e4`, read `u8(body[12+0x14e4]) == 251` so length is 251, therefore content is `body[12+0x14e4+1:+251] == body[5361:5612]`, `b'#!/bin/sh\nexport PKG_UPGRADE=1\n[ "${IPKG_NO_SCRIPT}" = "1" ] && exit 0\n[ -s ${IPKG_INSTROOT}/lib/functions.sh ] || exit 0\n. ${IPKG_INSTROOT}/lib/functions.sh\nexport root="${IPKG_INSTROOT}"\nexport pkgname="crowdsec"\nadd_group_and_user\ndefault_postinst\n'`, which prints as:
 
 ```sh
@@ -344,6 +346,12 @@ add_group_and_user
 default_postinst
 
 ```
+
+### ADBI_PKG_TRIGGERS: triggers
+
+ID 4 in the `ADB_BLOCK_ADB` is `ADBI_PKG_TRIGGERS` which is an OBJECT with multiple `BLOB`s that shall trigger the `TRIGGER` script to run.
+
+Note it is totally valid that a package does not have `TRIGGER` script yet has multiuple `TRIGGERS` paths.
 
 ### The signature block `ADB_BLOCK_SIG`
 
