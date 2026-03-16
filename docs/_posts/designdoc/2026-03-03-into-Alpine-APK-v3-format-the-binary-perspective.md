@@ -227,7 +227,7 @@ The implementation would pre-calculate all **valid** combinations of these; thes
 |<|Less than|0b0010|
 |<=|Less than or equal to|0b0011|
 |<~|less than or equal to, fuzzy|0b1011|
-|~|Fuzzy|0b1000|
+|~|Equal to, fuzzy|0b1001|
 |=|Equal to|0b0001|
 |>=|Greater than or equal to|0b0101|
 |>~|Greater than or equal to, fuzzy|0b1101|
